@@ -34,13 +34,21 @@ local Pattern = require('lschema.ddl.pattern');
 local ISA, Method = halo.class('lschema.poser');
 
 local ISA_TYPE = {
-    ['string']  = {},
-    ['number']  = { 'pattern' },
-    ['boolean'] = { 'min', 'max', 'pattern', 'unique' },
-    ['enum']    = { 'min', 'max', 'pattern' },
+    ['string']      = {},
+    ['number']      = { 'pattern' },
+    ['unsigned']    = { 'pattern' },
+    ['int']         = { 'pattern' },
+    ['uint']        = { 'pattern' },
+    ['boolean']     = { 'min', 'max', 'pattern', 'unique' },
+    ['enum']        = { 'min', 'max', 'pattern' },
     --['struct']  = { 'min', 'max', 'pattern', 'default' }
 };
 
+local CONSTRAINT_NUMBER = {
+    ['unsigned']    = true,
+    ['int']         = true,
+    ['uint']        = true
+};
 
 --- initializer
 -- @param   ddl     ddl
@@ -54,7 +62,7 @@ function Method:init( isa, rel )
     self:abort( 
         not methods, 
         'data type must be typeof %s',
-        'string | number | boolean | enum'
+        'string | number | unsigned | int | uint | boolean | enum'
     );
     
     -- set isa
@@ -107,6 +115,14 @@ function Method:min( val )
         typeof.finite( self.max ) == 'number' and val > self.max, 
         'min %d must be less than max: %d', val, self.max
     );
+    
+    if CONSTRAINT_NUMBER[self.isa] then
+        self:abort( 
+            not typeof[self.isa]( val ), 
+            'min %d must be type of %d', val, self.isa
+        );
+    end
+    
     rawset( self:getPrivate(), 'min', val );
     self._check:min( val );
     
@@ -125,6 +141,14 @@ function Method:max( val )
         typeof.finite( self.min ) and val < self.min, 
         'max %d must be greater than min: %d', val, self.min
     );
+    
+    if CONSTRAINT_NUMBER[self.isa] then
+        self:abort( 
+            not typeof[self.isa]( val ), 
+            'max %d must be type of %d', val, self.isa
+        );
+    end
+    
     rawset( self:getPrivate(), 'max', val );
     self._check:max( val );
     
@@ -144,18 +168,21 @@ function Method:pattern( val )
     return self;
 end
 
+
 --- default
 -- @param   val default value
 function Method:default( val )
-    local isa = self.isa == 'enum' and 'string' or self.isa;
+    local isa = self.isa == 'enum' and 'string' or 
+                self.isa == 'number' and 'finite' or
+                self.isa;
     
     self:abort( 
         val == nil and self.notNull, 
         'default value must not be nil' 
     );
     self:abort( 
-        val ~= nil and type( val ) ~= isa, 
-        'default value must be type of %s', isa 
+        val ~= nil and not typeof[isa]( val ), 
+        'default value %q must be type of %s', val, isa 
     );
     
     if self.isa == 'enum' then

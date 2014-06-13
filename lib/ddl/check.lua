@@ -32,8 +32,18 @@ local inspect = require('util').inspect;
 local typeof = require('util.typeof');
 local Check, Method, Property = halo.class();
 
+local PRIMITIVE_ISA_TYPE = {
+    ['string']  = true,
+    ['number']  = true,
+    ['boolean'] = true
+};
 
 local TMPL_LOC = {
+    isa     = {
+        primitive   = [[type( val ) ~= %q]],
+        custom      = [[not typeof.%s( val )]]
+    },
+    
     notNull = [[-- NOT NULL
         return ENULL;]],
     
@@ -72,11 +82,14 @@ local ENUM = %s;
 ]];
 
 local TMPL_FUNC = [[
+local type = type;
+local typeof = typeof;
+
 local function check( tbl, field, val )
     if val == nil then
         %NOTNULL
         %DEFAULT
-    elseif type( val ) ~= %ISA then
+    elseif %ISA then
         return ETYPE;
     end
     
@@ -102,19 +115,25 @@ Property({
         ['%ENUM']       = ''
     },
     env = {
-        ENULL = 1,
-        ETYPE = 2,
-        EMIN  = 3,
-        EMAX  = 4,
-        EPAT  = 5,
-        EENUM = 6,
-        type  = type
+        ENULL       = 1,
+        ETYPE       = 2,
+        EMIN        = 3,
+        EMAX        = 4,
+        EPAT        = 5,
+        EENUM       = 6,
+        type        = type,
+        typeof      = typeof
     }
 });
 
 function Method:init( isa )
     self.tmpl = TMPL_FUNC;
-    self.repls['%ISA'] = ('%q'):format( isa );
+    
+    if PRIMITIVE_ISA_TYPE[isa] then
+        self.repls['%ISA'] = TMPL_LOC.isa.primitive:format( isa );
+    else
+        self.repls['%ISA'] = TMPL_LOC.isa.custom:format( isa );
+    end
 end
 
 function Method:notNull()
@@ -143,7 +162,7 @@ function Method:pattern( val )
 end
 
 function Method:enum( val )
-    self.repls['%ISA'] = ('%q'):format('string');
+    self.repls['%ISA'] = TMPL_LOC.isa.primitive:format('string');
     self.repls['%ENUM'] = TMPL_LOC.enum;
     self.tmpl = TMPL_ENUM:format( 
         inspect( val )
