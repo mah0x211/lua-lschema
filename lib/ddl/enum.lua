@@ -22,20 +22,24 @@
   
   
   lib/ddl/enum.lua
-  lua-schema
+  lua-lschema
   Created by Masatoshi Teruya on 14/06/09.
 
 --]]
 
 local halo = require('halo');
 local typeof = require('util.typeof');
-local Enum, Method = halo.class('lschema.poser');
+local Enum = halo.class.Enum;
+
+Enum.inherits {
+    'lschema.poser.Poser'
+};
 
 
 --[[
     MARK: Metatable
 --]]
-function Method:init( tbl )
+function Enum:init( tbl )
     local private = self:getPrivate();
     local id, val;
     
@@ -61,7 +65,9 @@ function Method:init( tbl )
     end
     
     self:discardMethods();
+    
+    return self;
 end
 
 
-return Enum.constructor;
+return Enum.exports;

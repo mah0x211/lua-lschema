@@ -22,7 +22,7 @@
   
   
   lib/ddl/pattern.lua
-  lua-schema
+  lua-lschema
   Created by Masatoshi Teruya on 14/06/12.
 
 --]]
@@ -31,7 +31,11 @@ local halo = require('halo');
 local typeof = require('util.typeof');
 local lrex = require('rex_pcre');
 local unpack = unpack or table.unpack;
-local Pattern, Method = halo.class('lschema.poser');
+local Pattern = halo.class.Pattern;
+
+Pattern.inherits {
+    'lschema.poser.Poser'
+};
 
 
 -- EMAIL REGEXP
@@ -64,18 +68,23 @@ do
                                 IPV4 .. "|" .. 
                               ")";
     -- set ADDR-SPEC
-    Pattern.email = "^(?:" .. LOCAL_PART .. "@" .. DOMAIN .. ")$";
+    local ADDR_SPEC         = "^(?:" .. LOCAL_PART .. "@" .. DOMAIN .. ")$";
     
     -- set ADDR-SPEC-LOOSE
     local DOT_ATOM_LOOSE    = "(?:" .. ATEXT .. "+(?:\\.|" .. ATEXT .. ")*)";
     local LOCAL_PART_LOOSE  = "(?:" .. DOT_ATOM_LOOSE .. "|" .. QTEXT .. ")";
-    Pattern.emailLoose = "^(?:" .. LOCAL_PART_LOOSE .. "@" .. DOMAIN .. ")$";
+    local ADDR_SPEC_LOOSE   = "^(?:" .. LOCAL_PART_LOOSE .. "@" .. DOMAIN .. ")$";
+    
+    Pattern.property {
+        email = ADDR_SPEC,
+        emailLoose = ADDR_SPEC_LOOSE
+    };
 end
 
 --[[
     MARK: Method
 --]]
-function Method:init( tbl )
+function Pattern:init( tbl )
     
     self:abort( 
         not typeof.table( tbl ), 
@@ -90,4 +99,4 @@ function Method:init( tbl )
 end
 
 
-return Pattern.constructor;
+return Pattern.exports;

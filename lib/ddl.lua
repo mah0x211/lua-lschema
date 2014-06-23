@@ -22,15 +22,18 @@
   
   
   lib/ddl.lua
-  lua-schema
+  lua-lschema
   Created by Masatoshi Teruya on 14/06/08.
   
 --]]
 local halo = require('halo');
-local inspect = require('util').inspect;
 local Container = require('lschema.container');
 local ISA = require('lschema.ddl.isa');
-local DDL, Method = halo.class('lschema.poser');
+local DDL = halo.class.DDL;
+
+DDL.inherits {
+    'lschema.poser.Poser'
+};
 
 --[[
     MARK: Method
@@ -39,15 +42,17 @@ local function createISA( ... )
     return ISA.new( ... )
 end
 
-function Method:init()
+function DDL:init()
     local private = self:getPrivate();
     
     rawset( private, 'isa', createISA );
     rawset( private, 'enum', Container.new('lschema.ddl.enum') );
     rawset( private, 'struct', Container.new('lschema.ddl.struct') );
     rawset( private, 'pattern', Container.new('lschema.ddl.pattern') );
+    
+    return self;
 end
 
 
-return DDL.constructor;
+return DDL.exports;
 

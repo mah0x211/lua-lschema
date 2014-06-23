@@ -22,15 +22,18 @@
   
   
   lib/container.lua
-  lua-schema
+  lua-lschema
   Created by Masatoshi Teruya on 14/06/12.
 
 --]]
 
 local halo = require('halo');
 local typeof = require('util.typeof');
-local Container, Method = halo.class('lschema.poser');
-local inspect = require('util').inspect;
+local Container = halo.class.Container;
+
+Container.inherits {
+    'lschema.poser.Poser'
+};
 
 local CLASS_OF = 'CLASS_OF';
 
@@ -43,15 +46,17 @@ function Container:__call( name )
     self:isValidIdent( name );
     return function( ... )
         local private = self:getPrivate();
-        local instance, swap = rawget( private, CLASS_OF ).new( ... );
+        local instance = rawget( private, CLASS_OF ).new( ... );
         
-        rawset( private, name, swap or instance );
+        rawset( private, name, instance );
     end
 end
 
-function Method:init( class )
+function Container:init( class )
     rawset( self:getPrivate(), CLASS_OF, require( class ) );
+    
+    return self;
 end
 
 
-return Container.constructor;
+return Container.exports;

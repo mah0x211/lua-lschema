@@ -22,7 +22,7 @@
   
   
   lib/ddl/check.lua
-  lua-schema
+  lua-lschema
   Created by Masatoshi Teruya on 14/06/11.
 
 --]]
@@ -30,7 +30,7 @@ local LUA_VERS = tonumber( _VERSION:match( 'Lua (.+)$' ) );
 local halo = require('halo');
 local inspect = require('util').inspect;
 local typeof = require('util.typeof');
-local Check, Method, Property = halo.class();
+local Check = halo.class.Check;
 
 local PRIMITIVE_ISA_TYPE = {
     ['string']  = true,
@@ -103,18 +103,19 @@ end
 return check;
 ]];
 
-Property({
-    tmpl = '',
-    minmax = {},
-    repls = {
+
+function Check:init( isa )
+    self.tmpl = TMPL_FUNC;
+    self.minmax = {};
+    self.repls = {
         ['%NOTNULL']    = '',
         ['%DEFAULT']    = 'return true',
         ['%ISA']        = '',
         ['%MINMAX']     = '',
         ['%PATTERN']    = '',
         ['%ENUM']       = ''
-    },
-    env = {
+    };
+    self.env = {
         ENULL       = 1,
         ETYPE       = 2,
         EMIN        = 3,
@@ -123,45 +124,43 @@ Property({
         EENUM       = 6,
         type        = type,
         typeof      = typeof
-    }
-});
-
-function Method:init( isa )
-    self.tmpl = TMPL_FUNC;
+    };
     
     if PRIMITIVE_ISA_TYPE[isa] then
         self.repls['%ISA'] = TMPL_LOC.isa.primitive:format( isa );
     else
         self.repls['%ISA'] = TMPL_LOC.isa.custom:format( isa );
     end
+    
+    return self;
 end
 
-function Method:notNull()
+function Check:notNull()
     self.repls['%NOTNULL'] = TMPL_LOC.notNull;
     self.repls['%DEFAULT'] = '';
 end
 
-function Method:default( val )
+function Check:default( val )
     self.repls['%NOTNULL'] = '';
     self.repls['%DEFAULT'] = TMPL_LOC.default:format( 
         typeof.string( val ) and '"'..val..'"' or val
     );
 end
 
-function Method:min( val )
+function Check:min( val )
     rawset( self.minmax, #self.minmax + 1, TMPL_LOC.min:format( val ) );
 end
 
-function Method:max( val )
+function Check:max( val )
     rawset( self.minmax, #self.minmax + 1, TMPL_LOC.max:format( val ) );
 end
 
-function Method:pattern( val )
+function Check:pattern( val )
     self.repls['%PATTERN'] = TMPL_LOC.pattern;
     rawset( self.env, 'pattern', val );
 end
 
-function Method:enum( val )
+function Check:enum( val )
     self.repls['%ISA'] = TMPL_LOC.isa.primitive:format('string');
     self.repls['%ENUM'] = TMPL_LOC.enum;
     self.tmpl = TMPL_ENUM:format( 
@@ -170,7 +169,7 @@ function Method:enum( val )
 end
 
 
-function Method:make()
+function Check:make()
     local tmpl = self.tmpl;
     local repls = self.repls;
     local minmax = self.minmax;
@@ -208,5 +207,5 @@ function Method:make()
 end
 
 
-return Check.constructor;
+return Check.exports;
 

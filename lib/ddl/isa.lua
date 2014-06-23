@@ -22,7 +22,7 @@
   
   
   lib/ddl/isa.lua
-  lua-schema
+  lua-lschema
   Created by Masatoshi Teruya on 14/06/08.
 
 --]]
@@ -31,7 +31,11 @@ local typeof = require('util.typeof');
 local Check = require('lschema.ddl.check');
 local Enum = require('lschema.ddl.enum');
 local Pattern = require('lschema.ddl.pattern');
-local ISA, Method = halo.class('lschema.poser');
+local ISA = halo.class.ISA;
+
+ISA.inherits {
+    'lschema.poser.Poser'
+};
 
 local ISA_TYPE = {
     ['string']      = {},
@@ -54,7 +58,7 @@ local CONSTRAINT_NUMBER = {
 -- @param   ddl     ddl
 -- @param   isa     string | number | boolean | table | array
 -- @param   rel     relation name if isa is table | enum
-function Method:init( isa, rel )
+function ISA:init( isa, rel )
     local private = self:getPrivate();
     local methods = ISA_TYPE[isa];
     local check, i, method;
@@ -84,11 +88,13 @@ function Method:init( isa, rel )
     for i, method in ipairs( methods ) do
         rawset( private, method, nil );
     end
+    
+    return self;
 end
 
 
 --- not null
-function Method:notNull( ... )
+function ISA:notNull( ... )
     self:abort( #{...} > 0, 'should not pass argument' );
     rawset( self:getPrivate(), 'notNull', true );
     self._check:notNull();
@@ -97,7 +103,7 @@ end
 
 
 --- unique
-function Method:unique( ... )
+function ISA:unique( ... )
     self:abort( #{...} > 0, 'should not pass argument' );
     rawset( self:getPrivate(), 'unique', true );
     return self;
@@ -106,7 +112,7 @@ end
 
 --- min
 -- @param   val number of minimum
-function Method:min( val )
+function ISA:min( val )
     self:abort( 
         not typeof.finite( val ), 
         'min %q must be finite number', val 
@@ -132,7 +138,7 @@ end
 
 --- max
 -- @param   val number of maxium
-function Method:max( val )
+function ISA:max( val )
     self:abort( 
         not typeof.finite( val ), 
         'max %q must be finite number', val 
@@ -157,7 +163,7 @@ end
 
 
 -- pattern
-function Method:pattern( val )
+function ISA:pattern( val )
     self:abort( 
         not halo.instanceof( val, Pattern ), 
         'pattern must be instance of Pattern'
@@ -171,7 +177,7 @@ end
 
 --- default
 -- @param   val default value
-function Method:default( val )
+function ISA:default( val )
     local isa = self.isa == 'enum' and 'string' or 
                 self.isa == 'number' and 'finite' or
                 self.isa;
@@ -199,7 +205,7 @@ function Method:default( val )
 end
 
 
-function Method:makeCheck()
+function ISA:makeCheck()
     local private = self:getPrivate();
     local check = private._check;
     local fn;
@@ -221,5 +227,5 @@ function Method:makeCheck()
 end
 
 
-return ISA.constructor;
+return ISA.exports;
 

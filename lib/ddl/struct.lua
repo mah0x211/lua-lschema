@@ -21,20 +21,24 @@
   THE SOFTWARE.
   
   
-  lib/ddl/table.lua
-  lua-schema
+  lib/ddl/struct.lua
+  lua-lschema
   Created by Masatoshi Teruya on 14/06/09.
 
 --]]
 local halo = require('halo');
 local typeof = require('util.typeof');
 local ISA = require('lschema.ddl.isa');
-local Struct, Method = halo.class('lschema.poser');
+local Struct = halo.class.Struct;
+
+Struct.inherits {
+    'lschema.poser.Poser'
+};
 
 --[[
     MARK: Method
 --]]
-function Method:init( tbl )
+function Struct:init( tbl )
     local private = self:getPrivate();
     local id,isa;
     
@@ -60,7 +64,9 @@ function Method:init( tbl )
     end
     
     self:discardMethods();
+    
+    return self;
 end
 
 
-return Struct.constructor;
+return Struct.exports;

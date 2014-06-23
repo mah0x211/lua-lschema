@@ -22,14 +22,14 @@
   
   
   lib/poser.lua
-  lua-schema
+  lua-lschema
   Created by Masatoshi Teruya on 14/06/12.
 
 --]]
 
 local halo = require('halo');
 local typeof = require('util.typeof');
-local Poser, Method = halo.class();
+local Poser = halo.class.Poser;
 
 --[[
     MARK: Patterns
@@ -52,15 +52,15 @@ end
     MARK: Method
 --]]
 -- for reserved word
-function Method:fields()
+function Poser:fields()
 end
 
-function Method:getPrivate()
+function Poser:getPrivate()
     return getmetatable( self ).__index;
 end
 
 
-function Method:abort( exp, fmt, ... )
+function Poser:abort( exp, fmt, ... )
     if exp then
         error( string.format( fmt, ... ) );
         --[[
@@ -82,7 +82,7 @@ function Method:abort( exp, fmt, ... )
 end
 
 
-function Method:isValidIdent( id )
+function Poser:isValidIdent( id )
     local private = self:getPrivate();
     
     self:abort( 
@@ -101,7 +101,7 @@ end
 
 
 --- remove all methods
-function Method:discardMethods()
+function Poser:discardMethods()
     local private = self:getPrivate();
     local fields = {};
     local k,v;
@@ -121,7 +121,7 @@ function Method:discardMethods()
 end
 
 
-function Method:posing( instance )
+function Poser:posing( instance )
     local private = self:getPrivate();
     local mt = getmetatable( instance );
     
@@ -133,4 +133,4 @@ end
 
 
 
-return Poser.constructor;
+return Poser.exports;

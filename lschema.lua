@@ -22,28 +22,34 @@
   
   
   schema.lua
-  lua-schema
+  lua-lschema
   Created by Masatoshi Teruya on 14/06/08.
   
 --]]
 local halo = require('halo');
 local typeof = require('util.typeof');
 local DDL = require('lschema.ddl');
-local Schema, Method, Property = halo.class('lschema.poser');
+local Schema = halo.class.Schema;
+
+Schema.inherits {
+    'lschema.poser.Poser'
+};
 
 
 --[[
     MARK: Property
 --]]
-Property({
-    name = ''
-});
+Schema:property {
+    public = {
+        name = ''
+    }
+};
 
 
 --[[
     MARK: Metatable
 --]]
-function Method:init( name )
+function Schema:init( name )
     local private = self:getPrivate();
     local ddl;
     
@@ -52,17 +58,17 @@ function Method:init( name )
     ddl = DDL.new();
     rawset( private, 'ddl', ddl );
     
-    return ddl;
+    return self;
 end
 
-function Method:dml()
-
-end
-
-function Method:dcl()
+function Schema:dml()
 
 end
 
+function Schema:dcl()
 
-return Schema.constructor;
+end
+
+
+return Schema.exports;
 
