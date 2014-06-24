@@ -28,6 +28,7 @@
 --]]
 local LUA_VERS = tonumber( _VERSION:match( 'Lua (.+)$' ) );
 local halo = require('halo');
+local eval = require('util').eval;
 local inspect = require('util').inspect;
 local typeof = require('util.typeof');
 local Check = halo.class.Check;
@@ -173,7 +174,7 @@ function Check:make()
     local tmpl = self.tmpl;
     local repls = self.repls;
     local minmax = self.minmax;
-    local ok, err;
+    local err;
     
     if #minmax > 0 then
         minmax = table.concat( minmax, 'else' );
@@ -182,26 +183,8 @@ function Check:make()
     
     tmpl = tmpl:gsub( '%%[A-Z]+', repls );
     -- create function
-    -- for Lua5.2
-    if LUA_VERS > 5.1 then
-        tmpl, err = load( tmpl, nil, 't', self.env );
-        if not tmpl then
-            error( err );
-        end
-        ok, tmpl = pcall( tmpl );
-    -- for Lua5.1
-    else
-        tmpl, err = loadstring( tmpl );
-        if not tmpl then
-            error( err );
-        end
-        setfenv( tmpl, self.env );
-        ok, tmpl = pcall( tmpl );
-    end
-    
-    if not ok then
-        error( tmpl );
-    end
+    tmpl, err = eval( tmpl, self, env );
+    assert( not err, err );
     
     return tmpl;
 end
