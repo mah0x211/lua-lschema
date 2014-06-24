@@ -43,12 +43,12 @@ local function createISA( ... )
 end
 
 function DDL:init()
-    local private = self:getPrivate();
+    local index = self:getIndex();
     
-    rawset( private, 'isa', createISA );
-    rawset( private, 'enum', Container.new('lschema.ddl.enum') );
-    rawset( private, 'struct', Container.new('lschema.ddl.struct') );
-    rawset( private, 'pattern', Container.new('lschema.ddl.pattern') );
+    rawset( index, 'isa', createISA );
+    rawset( index, 'enum', Container.new('lschema.ddl.enum') );
+    rawset( index, 'struct', Container.new('lschema.ddl.struct') );
+    rawset( index, 'pattern', Container.new('lschema.ddl.pattern') );
     
     return self;
 end

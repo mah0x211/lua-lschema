@@ -39,7 +39,7 @@ Struct.inherits {
     MARK: Method
 --]]
 function Struct:init( tbl )
-    local private = self:getPrivate();
+    local index = self:getIndex();
     local id,isa;
     
     self:abort( 
@@ -49,7 +49,7 @@ function Struct:init( tbl )
     for id, isa in pairs( tbl ) do
         self:isValidIdent( id );
         self:abort( 
-            rawget( private, id ), 
+            rawget( index, id ), 
             'identifier %q already defined', id 
         );
         self:abort( 
@@ -60,7 +60,7 @@ function Struct:init( tbl )
         if typeof.Function( isa.fields ) then 
             isa:makeCheck();
         end
-        rawset( private, id, isa );
+        rawset( index, id, isa );
     end
     
     self:discardMethods();

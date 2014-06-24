@@ -40,7 +40,7 @@ Enum.inherits {
     MARK: Metatable
 --]]
 function Enum:init( tbl )
-    local private = self:getPrivate();
+    local index = self:getIndex();
     local id, val;
     
     self:abort( 
@@ -54,14 +54,14 @@ function Enum:init( tbl )
         end
         self:isValidIdent( id );
         self:abort( 
-            rawget( private, id ), 
+            rawget( index, id ), 
             'idenifier %q already defined', id
         );
         self:abort( 
             not typeof.finite( val ), 
             'identifier %q value must be finite number: %q', id, val
         );
-        rawset( private, id, val );
+        rawset( index, id, val );
     end
     
     self:discardMethods();

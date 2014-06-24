@@ -55,7 +55,7 @@ end
 function Poser:fields()
 end
 
-function Poser:getPrivate()
+function Poser:getIndex()
     return getmetatable( self ).__index;
 end
 
@@ -83,10 +83,10 @@ end
 
 
 function Poser:isValidIdent( id )
-    local private = self:getPrivate();
+    local index = self:getIndex();
     
     self:abort( 
-        not typeof.Nil( rawget( private, id ) ), 
+        not typeof.Nil( rawget( index, id ) ), 
         'identifier %q is reserved word', id 
     );
     self:abort( 
@@ -102,14 +102,14 @@ end
 
 --- remove all methods
 function Poser:discardMethods()
-    local private = self:getPrivate();
+    local index = self:getIndex();
     local fields = {};
     local k,v;
     
-    for k,v in pairs( private ) do
+    for k,v in pairs( index ) do
         if k ~= 'constructor' then
             if typeof.Function( v ) then
-                rawset( private, k, nil );
+                rawset( index, k, nil );
             else
                 rawset( fields, k, v );
             end
@@ -117,16 +117,16 @@ function Poser:discardMethods()
     end
     
     -- replace fields
-    rawset( private, 'fields', fields );
+    rawset( index, 'fields', fields );
 end
 
 
 function Poser:posing( instance )
-    local private = self:getPrivate();
+    local index = self:getIndex();
     local mt = getmetatable( instance );
     
     rawset( mt, 'constructor', self.constructor );
-    setmetatable( mt.__index, getmetatable( private ) );
+    setmetatable( mt.__index, getmetatable( index ) );
     
     return instance;
 end

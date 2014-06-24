@@ -45,15 +45,15 @@ function Container:__call( name )
     
     self:isValidIdent( name );
     return function( ... )
-        local private = self:getPrivate();
-        local instance = rawget( private, CLASS_OF ).new( ... );
+        local index = self:getIndex();
+        local instance = rawget( index, CLASS_OF ).new( ... );
         
-        rawset( private, name, instance );
+        rawset( index, name, instance );
     end
 end
 
 function Container:init( class )
-    rawset( self:getPrivate(), CLASS_OF, require( class ) );
+    rawset( self:getIndex(), CLASS_OF, require( class ) );
     
     return self;
 end

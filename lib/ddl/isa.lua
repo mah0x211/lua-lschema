@@ -59,7 +59,7 @@ local CONSTRAINT_NUMBER = {
 -- @param   isa     string | number | boolean | table | array
 -- @param   rel     relation name if isa is table | enum
 function ISA:init( isa, rel )
-    local private = self:getPrivate();
+    local index = self:getIndex();
     local methods = ISA_TYPE[isa];
     local check, i, method;
     
@@ -70,10 +70,10 @@ function ISA:init( isa, rel )
     );
     
     -- set isa
-    rawset( private, 'isa', isa );
+    rawset( index, 'isa', isa );
     -- create instance of Check class
     check = Check.new( isa );
-    rawset( private, '_check', check );
+    rawset( index, '_check', check );
     -- check relation
     if isa == 'enum' then
         self:abort( 
@@ -81,12 +81,12 @@ function ISA:init( isa, rel )
             '%s %q is not defined', isa, rel
         );
         -- set reference of related instance
-        rawset( private, 'rel', rel );
+        rawset( index, 'rel', rel );
     end
     
     -- remove unused methods
     for i, method in ipairs( methods ) do
-        rawset( private, method, nil );
+        rawset( index, method, nil );
     end
     
     return self;
@@ -96,7 +96,7 @@ end
 --- not null
 function ISA:notNull( ... )
     self:abort( #{...} > 0, 'should not pass argument' );
-    rawset( self:getPrivate(), 'notNull', true );
+    rawset( self:getIndex(), 'notNull', true );
     self._check:notNull();
     return self;
 end
@@ -105,7 +105,7 @@ end
 --- unique
 function ISA:unique( ... )
     self:abort( #{...} > 0, 'should not pass argument' );
-    rawset( self:getPrivate(), 'unique', true );
+    rawset( self:getIndex(), 'unique', true );
     return self;
 end
 
@@ -129,7 +129,7 @@ function ISA:min( val )
         );
     end
     
-    rawset( self:getPrivate(), 'min', val );
+    rawset( self:getIndex(), 'min', val );
     self._check:min( val );
     
     return self;
@@ -155,7 +155,7 @@ function ISA:max( val )
         );
     end
     
-    rawset( self:getPrivate(), 'max', val );
+    rawset( self:getIndex(), 'max', val );
     self._check:max( val );
     
     return self;
@@ -168,7 +168,7 @@ function ISA:pattern( val )
         not halo.instanceof( val, Pattern ), 
         'pattern must be instance of Pattern'
     );
-    rawset( self:getPrivate(), 'pattern', val );
+    rawset( self:getIndex(), 'pattern', val );
     self._check:pattern( val );
     
     return self;
@@ -198,7 +198,7 @@ function ISA:default( val )
         );
     end
     
-    rawset( self:getPrivate(), 'default', val );
+    rawset( self:getIndex(), 'default', val );
     self._check:default( val );
     
     return self;
@@ -206,24 +206,24 @@ end
 
 
 function ISA:makeCheck()
-    local private = self:getPrivate();
-    local check = private._check;
+    local index = self:getIndex();
+    local check = index._check;
     local fn;
     
-    if rawget( private, 'rel' ) then
-        check[private.isa]( check, private.rel.fields );
+    if rawget( index, 'rel' ) then
+        check[index.isa]( check, index.rel.fields );
         -- remove related instance
-        rawset( private, 'rel', nil );
+        rawset( index, 'rel', nil );
     end
     
     -- make check function
     fn = check:make();
     -- remove instance of Check class
-    rawset( private, '_check', nil );
+    rawset( index, '_check', nil );
     -- remove unused methods
     self:discardMethods();
     -- save check function
-    rawset( private, 'check', fn );
+    rawset( index, 'check', fn );
 end
 
 

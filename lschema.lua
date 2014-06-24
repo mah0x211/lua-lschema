@@ -50,13 +50,13 @@ Schema:property {
     MARK: Metatable
 --]]
 function Schema:init( name )
-    local private = self:getPrivate();
+    local index = self:getIndex();
     local ddl;
     
     self:isValidIdent( name );
     self.name = name;
     ddl = DDL.new();
-    rawset( private, 'ddl', ddl );
+    rawset( index, 'ddl', ddl );
     
     return self;
 end
