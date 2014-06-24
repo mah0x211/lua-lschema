@@ -52,14 +52,19 @@ function Struct:init( tbl )
             rawget( index, id ), 
             'identifier %q already defined', id 
         );
-        self:abort( 
-            not halo.instanceof( isa, ISA ), 
-            'value %q must be instance of class schema.isa', isa
-        );
         
-        if typeof.Function( isa.fields ) then 
-            isa:makeCheck();
+        -- not instance of Struct
+        if not rawequal( self.constructor, isa.constructor ) then
+            self:abort( 
+                not halo.instanceof( isa, ISA ), 
+                'value %q must be instance of class schema.isa', isa
+            );
+            
+            if typeof.Function( isa.fields ) then 
+                isa:makeCheck();
+            end
         end
+        
         rawset( index, id, isa );
     end
     
