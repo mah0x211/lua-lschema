@@ -27,12 +27,19 @@
   
 --]]
 local halo = require('halo');
+local AUX = require('lschema.aux');
 local Container = require('lschema.container');
 local ISA = require('lschema.ddl.isa');
 local DDL = halo.class.DDL;
 
 DDL.inherits {
-    'lschema.poser.Poser'
+    'lschema.aux.AUX',
+    except = {
+        static = {
+            'isValidIdent', 'getIndex', 'setCall', 'abort', 'discardMethods',
+            'posing'
+        }
+    }
 };
 
 --[[
@@ -43,7 +50,7 @@ local function createISA( ... )
 end
 
 function DDL:init()
-    local index = self:getIndex();
+    local index = AUX.getIndex( self );
     
     rawset( index, 'isa', createISA );
     rawset( index, 'enum', Container.new('lschema.ddl.enum') );

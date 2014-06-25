@@ -28,47 +28,49 @@
 --]]
 local halo = require('halo');
 local typeof = require('util.typeof');
-local ISA = require('lschema.ddl.isa');
+local AUX = require('lschema.aux');
 local Struct = halo.class.Struct;
 
 Struct.inherits {
-    'lschema.poser.Poser'
+    'lschema.aux.AUX',
+    except = {
+        static = {
+            'isValidIdent', 'getIndex', 'setCall', 'abort', 'discardMethods',
+            'posing'
+        }
+    }
 };
+
 
 --[[
     MARK: Method
 --]]
 function Struct:init( tbl )
-    local index = self:getIndex();
-    local id,isa;
+    local ISA = require('lschema.ddl.isa');
+    local index = AUX.getIndex( self );
+    local id, isa;
     
-    self:abort( 
+    AUX.abort( 
         not typeof.table( tbl ), 
         'argument must be type of table'
     );
     for id, isa in pairs( tbl ) do
-        self:isValidIdent( id );
-        self:abort( 
+        AUX.isValidIdent( self, id );
+        AUX.abort( 
             rawget( index, id ), 
             'identifier %q already defined', id 
         );
+        AUX.abort( 
+            not halo.instanceof( isa, ISA ), 
+            'value %q must be instance of schema.ddl.ISA class', isa
+        );
         
-        -- not instance of Struct
-        if not rawequal( self.constructor, isa.constructor ) then
-            self:abort( 
-                not halo.instanceof( isa, ISA ), 
-                'value %q must be instance of class schema.isa', isa
-            );
-            
-            if typeof.Function( isa.fields ) then 
-                isa:makeCheck();
-            end
+        if not AUX.hasCallMethod( isa ) then 
+            isa:makeCheck();
         end
         
         rawset( index, id, isa );
     end
-    
-    self:discardMethods();
     
     return self;
 end

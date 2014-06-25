@@ -28,13 +28,20 @@
 --]]
 local halo = require('halo');
 local typeof = require('util.typeof');
+local AUX = require('lschema.aux');
 local Check = require('lschema.ddl.check');
 local Enum = require('lschema.ddl.enum');
 local Pattern = require('lschema.ddl.pattern');
 local ISA = halo.class.ISA;
 
 ISA.inherits {
-    'lschema.poser.Poser'
+    'lschema.aux.AUX',
+    except = {
+        static = {
+            'isValidIdent', 'getIndex', 'setCall', 'abort', 'discardMethods',
+            'posing'
+        }
+    }
 };
 
 local ISA_TYPE = {
@@ -56,14 +63,14 @@ local CONSTRAINT_NUMBER = {
 
 --- initializer
 -- @param   ddl     ddl
--- @param   isa     string | number | boolean | table | array
+-- @param   isa     string | number | unsigned | int | uint | boolean | enum | array
 -- @param   rel     relation name if isa is table | enum
 function ISA:init( isa, rel )
-    local index = self:getIndex();
+    local index = AUX.getIndex( self );
     local methods = ISA_TYPE[isa];
     local check, i, method;
     
-    self:abort( 
+    AUX.abort( 
         not methods, 
         'data type must be typeof %s',
         'string | number | unsigned | int | uint | boolean | enum'
@@ -83,7 +90,7 @@ function ISA:init( isa, rel )
         -- set reference of related instance
         rawset( index, 'rel', rel );
     end
-    
+
     -- remove unused methods
     for i, method in ipairs( methods ) do
         rawset( index, method, nil );
@@ -95,17 +102,17 @@ end
 
 --- not null
 function ISA:notNull( ... )
-    self:abort( #{...} > 0, 'should not pass argument' );
-    rawset( self:getIndex(), 'notNull', true );
-    self._check:notNull();
+    AUX.abort( #{...} > 0, 'should not pass argument' );
+    rawset( AUX.getIndex( self ), 'notNull', true );
+    protected( self ).check:notNull();
     return self;
 end
 
 
 --- unique
 function ISA:unique( ... )
-    self:abort( #{...} > 0, 'should not pass argument' );
-    rawset( self:getIndex(), 'unique', true );
+    AUX.abort( #{...} > 0, 'should not pass argument' );
+    rawset( AUX.getIndex( self ), 'unique', true );
     return self;
 end
 
@@ -113,24 +120,24 @@ end
 --- min
 -- @param   val number of minimum
 function ISA:min( val )
-    self:abort( 
+    AUX.abort( 
         not typeof.finite( val ), 
         'min %q must be finite number', val 
     );
-    self:abort( 
+    AUX.abort( 
         typeof.finite( self.max ) == 'number' and val > self.max, 
         'min %d must be less than max: %d', val, self.max
     );
     
     if CONSTRAINT_NUMBER[self.isa] then
-        self:abort( 
+        AUX.abort( 
             not typeof[self.isa]( val ), 
             'min %d must be type of %d', val, self.isa
         );
     end
     
-    rawset( self:getIndex(), 'min', val );
     self._check:min( val );
+    rawset( AUX.getIndex( self ), 'min', val );
     
     return self;
 end
@@ -139,24 +146,24 @@ end
 --- max
 -- @param   val number of maxium
 function ISA:max( val )
-    self:abort( 
+    AUX.abort( 
         not typeof.finite( val ), 
         'max %q must be finite number', val 
     );
-    self:abort( 
+    AUX.abort( 
         typeof.finite( self.min ) and val < self.min, 
         'max %d must be greater than min: %d', val, self.min
     );
     
     if CONSTRAINT_NUMBER[self.isa] then
-        self:abort( 
+        AUX.abort( 
             not typeof[self.isa]( val ), 
             'max %d must be type of %d', val, self.isa
         );
     end
     
-    rawset( self:getIndex(), 'max', val );
     self._check:max( val );
+    rawset( AUX.getIndex( self ), 'max', val );
     
     return self;
 end
@@ -164,12 +171,12 @@ end
 
 -- pattern
 function ISA:pattern( val )
-    self:abort( 
+    AUX.abort( 
         not halo.instanceof( val, Pattern ), 
         'pattern must be instance of Pattern'
     );
-    rawset( self:getIndex(), 'pattern', val );
     self._check:pattern( val );
+    rawset( AUX.getIndex( self ), 'pattern', val );
     
     return self;
 end
@@ -182,18 +189,18 @@ function ISA:default( val )
                 self.isa == 'number' and 'finite' or
                 self.isa;
     
-    self:abort( 
+    AUX.abort( 
         val == nil and self.notNull, 
         'default value must not be nil' 
     );
-    self:abort( 
+    AUX.abort( 
         val ~= nil and not typeof[isa]( val ), 
         'default value %q must be type of %s', val, isa 
     );
     
     if self.isa == 'enum' then
-        self:abort( 
-            not rawget( self.rel.fields, val ), 
+        AUX.abort( 
+            not rawget( self.of.fields, val ), 
             'default value %q is not defined at enum', val 
         );
     end
@@ -206,8 +213,8 @@ end
 
 
 function ISA:makeCheck()
-    local index = self:getIndex();
     local check = index._check;
+    local index = AUX.getIndex( self );
     local fn;
     
     if rawget( index, 'rel' ) then
@@ -218,12 +225,14 @@ function ISA:makeCheck()
     
     -- make check function
     fn = check:make();
+    -- set generated function to __call metamethod
+    AUX.setCallMethod( self, fn );
     -- remove instance of Check class
     rawset( index, '_check', nil );
     -- remove unused methods
-    self:discardMethods();
     -- save check function
     rawset( index, 'check', fn );
+    AUX.discardMethods( self );
 end
 
 

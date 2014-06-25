@@ -31,10 +31,17 @@ local halo = require('halo');
 local typeof = require('util.typeof');
 local lrex = require('rex_pcre');
 local unpack = unpack or table.unpack;
+local AUX = require('lschema.aux');
 local Pattern = halo.class.Pattern;
 
 Pattern.inherits {
-    'lschema.poser.Poser'
+    'lschema.aux.AUX',
+    except = {
+        static = {
+            'isValidIdent', 'getIndex', 'setCall', 'abort', 'discardMethods',
+            'posing'
+        }
+    }
 };
 
 
@@ -86,16 +93,16 @@ end
 --]]
 function Pattern:init( tbl )
     
-    self:abort( 
+    AUX.abort( 
         not typeof.table( tbl ), 
         'argument must be type of table'
     );
-    self:abort( 
+    AUX.abort( 
         not typeof.string( tbl[1] ), 
         'pattern[1] must be type of string'
     );
     
-    return self:posing( lrex.new( unpack( tbl ) ) );
+    return AUX.posing( lrex.new( unpack( tbl ) ), self );
 end
 
 

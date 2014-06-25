@@ -28,11 +28,17 @@
 --]]
 
 local halo = require('halo');
-local typeof = require('util.typeof');
+local AUX = require('lschema.aux');
 local Container = halo.class.Container;
 
 Container.inherits {
-    'lschema.poser.Poser'
+    'lschema.aux.AUX',
+    except = {
+        static = {
+            'isValidIdent', 'getIndex', 'setCall', 'abort', 'discardMethods',
+            'posing'
+        }
+    }
 };
 
 local CLASS_OF = 'CLASS_OF';
@@ -43,9 +49,9 @@ local CLASS_OF = 'CLASS_OF';
 function Container:__call( name )
     local self = self;
     
-    self:isValidIdent( name );
+    AUX.isValidIdent( self, name );
     return function( ... )
-        local index = self:getIndex();
+        local index = AUX.getIndex( self );
         local instance = rawget( index, CLASS_OF ).new( ... );
         
         rawset( index, name, instance );
@@ -53,7 +59,7 @@ function Container:__call( name )
 end
 
 function Container:init( class )
-    rawset( self:getIndex(), CLASS_OF, require( class ) );
+    rawset( AUX.getIndex( self ), CLASS_OF, require( class ) );
     
     return self;
 end

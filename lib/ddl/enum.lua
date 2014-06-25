@@ -29,10 +29,17 @@
 
 local halo = require('halo');
 local typeof = require('util.typeof');
+local AUX = require('lschema.aux');
 local Enum = halo.class.Enum;
 
 Enum.inherits {
-    'lschema.poser.Poser'
+    'lschema.aux.AUX',
+    except = {
+        static = {
+            'isValidIdent', 'getIndex', 'setCall', 'abort', 'discardMethods',
+            'posing'
+        }
+    }
 };
 
 
@@ -40,10 +47,10 @@ Enum.inherits {
     MARK: Metatable
 --]]
 function Enum:init( tbl )
-    local index = self:getIndex();
+    local index = AUX.getIndex( self );
     local id, val;
     
-    self:abort( 
+    AUX.abort( 
         not typeof.table( tbl ), 
         'argument must be type of table'
     );
@@ -52,19 +59,19 @@ function Enum:init( tbl )
         if typeof.number( id ) then
             id, val = val, id;
         end
-        self:isValidIdent( id );
-        self:abort( 
+        AUX.isValidIdent( self, id );
+        AUX.abort( 
             rawget( index, id ), 
             'idenifier %q already defined', id
         );
-        self:abort( 
+        AUX.abort( 
             not typeof.finite( val ), 
             'identifier %q value must be finite number: %q', id, val
         );
         rawset( index, id, val );
     end
     
-    self:discardMethods();
+    AUX.discardMethods( self );
     
     return self;
 end

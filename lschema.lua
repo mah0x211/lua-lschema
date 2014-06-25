@@ -28,11 +28,18 @@
 --]]
 local halo = require('halo');
 local typeof = require('util.typeof');
+local AUX = require('lschema.aux');
 local DDL = require('lschema.ddl');
 local Schema = halo.class.Schema;
 
 Schema.inherits {
-    'lschema.poser.Poser'
+    'lschema.aux.AUX',
+    except = {
+        static = {
+            'isValidIdent', 'getIndex', 'setCall', 'abort', 'discardMethods',
+            'posing'
+        }
+    }
 };
 
 
@@ -50,10 +57,10 @@ Schema:property {
     MARK: Metatable
 --]]
 function Schema:init( name )
-    local index = self:getIndex();
+    local index = AUX.getIndex( self );
     local ddl;
     
-    self:isValidIdent( name );
+    AUX.isValidIdent( self, name );
     self.name = name;
     ddl = DDL.new();
     rawset( index, 'ddl', ddl );
