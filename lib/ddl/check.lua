@@ -186,7 +186,7 @@ function Check:make()
     tmpl, err = eval( tmpl, self.env );
     assert( not err, err );
     
-    return tmpl;
+    return tmpl();
 end
 
 
