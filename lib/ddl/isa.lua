@@ -88,8 +88,8 @@ local CONSTRAINT_NUMBER = {
 };
 
 --- initializer
--- @param   ddl     ddl
--- @param   isa     string | number | unsigned | int | uint | boolean | enum | array
+-- @param   ddl ddl
+-- @param   isa string | number | unsigned | int | uint | boolean | enum | struct
 function ISA:init( isa )
     local internal = protected( self );
     local index = AUX.getIndex( self );
@@ -117,7 +117,7 @@ end
 --- of: enum, struct
 function ISA:of( val )
     local class = ISA_OF[self.isa];
-
+    
     -- check instanceof
     AUX.abort( 
         not halo.instanceof( val, class ), 
@@ -132,7 +132,14 @@ end
 
 --- not null
 function ISA:notNull( ... )
-    AUX.abort( #{...} > 0, 'should not pass argument' );
+    AUX.abort( 
+        ISA_OF[self.isa] and typeof.Function( self.of ), 
+        ('%q must be set "of" attribute before other attributes'):format( self.isa )
+    );
+    AUX.abort( 
+        #{...} > 0, 
+        'should not pass argument' 
+    );
     rawset( AUX.getIndex( self ), 'notNull', true );
     protected( self ).check:notNull();
     return self;
@@ -219,6 +226,10 @@ function ISA:default( val )
                 self.isa == 'number' and 'finite' or
                 self.isa;
     
+    AUX.abort( 
+        ISA_OF[self.isa] and typeof.Function( self.of ), 
+        ('%q must be set "of" attribute before other attributes'):format( self.isa )
+    );
     AUX.abort( 
         val == nil and self.notNull, 
         'default value must not be nil' 
