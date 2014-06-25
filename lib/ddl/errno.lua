@@ -29,12 +29,10 @@
 
 return {
     ENULL       = 1,
-    EDEFAULT    = 2,
-    ETYPE       = 3,
-    EMIN        = 4,
-    EMAX        = 5,
-    EPAT        = 6,
-    EENUM       = 7,
-    EDEFAULT    = 8
+    ETYPE       = 2,
+    EMIN        = 3,
+    EMAX        = 4,
+    EPAT        = 5,
+    EENUM       = 6
 };
 

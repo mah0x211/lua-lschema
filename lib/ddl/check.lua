@@ -48,7 +48,7 @@ local TMPL_LOC = {
         return nil, ENULL;]],
     
     default = [[-- DEFALUT
-        return %s, EDEFAULT;]],
+        return %s;]],
     
     min = [[if len < %d then
         return nil, EMIN;
