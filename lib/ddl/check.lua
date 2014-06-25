@@ -183,7 +183,7 @@ function Check:make()
     
     tmpl = tmpl:gsub( '%%[A-Z]+', repls );
     -- create function
-    tmpl, err = eval( tmpl, self, env );
+    tmpl, err = eval( tmpl, self.env );
     assert( not err, err );
     
     return tmpl;
