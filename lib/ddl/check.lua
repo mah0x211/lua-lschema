@@ -26,7 +26,6 @@
   Created by Masatoshi Teruya on 14/06/11.
 
 --]]
-local LUA_VERS = tonumber( _VERSION:match( 'Lua (.+)$' ) );
 local halo = require('halo');
 local eval = require('util').eval;
 local inspect = require('util').inspect;
@@ -46,27 +45,26 @@ local TMPL_LOC = {
     },
     
     notNull = [[-- NOT NULL
-        return ENULL;]],
+        return nil, ENULL;]],
     
     default = [[-- DEFALUT
-        rawset( tbl, field, %s );
-        return true;]],
+        return %s, EDEFAULT;]],
     
     min = [[if len < %d then
-        return EMIN;
+        return nil, EMIN;
     ]],
     max = [[if len > %d then
-        return EMAX;]],
+        return nil, EMAX;]],
     
     enum = [[-- enum
     if not ENUM[val] then
-        return EENUM;
+        return nil, EENUM;
     end
     ]],
     
     pattern = [[-- PATTERN
     if not pattern:exec( val ) then
-        return EPAT;
+        return nil, EPAT;
     end
     ]]
 };
@@ -83,27 +81,39 @@ local ENUM = %s;
 ]];
 
 local TMPL_FUNC = [[
+
+local pattern = pattern;
 local type = type;
 local typeof = typeof;
-
-local function check( tbl, field, val )
+local check = {};
+function check:verify( val )
     if val == nil then
         %NOTNULL
         %DEFAULT
     elseif %ISA then
-        return ETYPE;
+        return nil, ETYPE;
     end
     
     %MINMAX
     %PATTERN
     %ENUM
     
-    return true;
+    return val;
 end
 
-return check;
+return check.verify;
 ]];
 
+-- append errno
+do 
+    local errno = {};
+    local k,v;
+    
+    for k,v in pairs( require('lschema.ddl.errno') ) do
+        rawset( errno, #errno + 1, ('local %s = %d;'):format( k, v ) );
+    end
+    TMPL_FUNC = table.concat( errno, '\n' ) .. TMPL_FUNC;
+end
 
 function Check:init( isa )
     self.tmpl = TMPL_FUNC;
@@ -117,12 +127,6 @@ function Check:init( isa )
         ['%ENUM']       = ''
     };
     self.env = {
-        ENULL       = 1,
-        ETYPE       = 2,
-        EMIN        = 3,
-        EMAX        = 4,
-        EPAT        = 5,
-        EENUM       = 6,
         type        = type,
         typeof      = typeof
     };
