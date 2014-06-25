@@ -34,6 +34,7 @@ return {
     EMIN        = 4,
     EMAX        = 5,
     EPAT        = 6,
-    EENUM       = 7
+    EENUM       = 7,
+    EDEFAULT    = 8
 };
 
