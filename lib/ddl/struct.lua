@@ -27,6 +27,7 @@
 
 --]]
 local halo = require('halo');
+local eval = require('util').eval;
 local typeof = require('util.typeof');
 local AUX = require('lschema.aux');
 local Struct = halo.class.Struct;
@@ -42,13 +43,59 @@ Struct.inherits {
 };
 
 
+local TMPL_ENV = {
+    type = type,
+    pairs = pairs,
+    rawset = rawset
+};
+local TMPL = [[
+local type = type;
+local pairs = pairs;
+local rawset = rawset;
+local check = {};
+function check:verify( tbl )
+    if type( tbl ) == 'table' then
+        local errtbl = {};
+        local field, val, err, gotError;
+        
+        for field, val in pairs( self.fields ) do
+            val, err = val( tbl[field] );
+            if v then
+                tbl[field] = v;
+            else
+                rawset( errtbl, field, err );
+                gotError = true;
+            end
+        end
+        
+        return tbl, gotError and errtbl or nil;
+    end
+    
+    return nil, ETYPE;
+end
+
+return check.verify;
+]];
+
+-- append errno
+do 
+    local errno = {};
+    local k,v;
+    
+    for k,v in pairs( require('lschema.ddl.errno') ) do
+        rawset( errno, #errno + 1, ('local %s = %d;'):format( k, v ) );
+    end
+    TMPL = table.concat( errno, '\n' ) .. TMPL;
+end
+
+
 --[[
     MARK: Method
 --]]
 function Struct:init( tbl )
     local ISA = require('lschema.ddl.isa');
     local index = AUX.getIndex( self );
-    local id, isa;
+    local id, isa, tmpl, err;
     
     AUX.abort( 
         not typeof.table( tbl ), 
@@ -71,6 +118,13 @@ function Struct:init( tbl )
         
         rawset( index, id, isa );
     end
+    
+    -- generate function
+    tmpl, err = eval( TMPL, TMPL_ENV );
+    assert( not err, err );
+    -- set generated function to __call metamethod
+    AUX.setCallMethod( self, tmpl() );
+    AUX.discardMethods( self );
     
     return self;
 end
