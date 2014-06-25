@@ -165,11 +165,11 @@ function Check:pattern( val )
     rawset( self.env, 'pattern', val );
 end
 
-function Check:enum( val )
+function Check:enum( enum )
     self.repls['%ISA'] = TMPL_LOC.isa.primitive:format('string');
     self.repls['%ENUM'] = TMPL_LOC.enum;
     self.tmpl = TMPL_ENUM:format( 
-        inspect( val )
+        inspect( enum.fields )
     ) .. self.tmpl;
 end
 
