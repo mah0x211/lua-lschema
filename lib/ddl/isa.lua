@@ -30,7 +30,6 @@ local halo = require('halo');
 local typeof = require('util.typeof');
 local AUX = require('lschema.aux');
 local Check = require('lschema.ddl.check');
-local Enum = require('lschema.ddl.enum');
 local Pattern = require('lschema.ddl.pattern');
 local ISA = halo.class.ISA;
 
@@ -44,15 +43,42 @@ ISA.inherits {
     }
 };
 
+
+--[[
+-------------------------------------------------------------------------
+            | of | notNull | unique | min | max | pattern | default | len
+-------------------------------------------------------------------------
+ string     |    | y       | y      | y   | y   | y       | y
+-------------------------------------------------------------------------
+ number     |    | y       | y      | y   | y   |         | y
+-------------------------------------------------------------------------
+ unsigned   |    | y       | y      | y   | y   |         | y
+-------------------------------------------------------------------------
+ int        |    | y       | y      | y   | y   |         | y
+-------------------------------------------------------------------------
+ uint       |    | y       | y      | y   | y   |         | y
+-------------------------------------------------------------------------
+ boolean    |    | y       |        |     |     |         | y
+-------------------------------------------------------------------------
+ enum       | y  | y       |        |     |     |         | y
+-------------------------------------------------------------------------
+ struct     | y  | y       |        |     |     |         |
+-------------------------------------------------------------------------
+--]]
 local ISA_TYPE = {
-    ['string']      = {},
-    ['number']      = { 'pattern' },
-    ['unsigned']    = { 'pattern' },
-    ['int']         = { 'pattern' },
-    ['uint']        = { 'pattern' },
-    ['boolean']     = { 'min', 'max', 'pattern', 'unique' },
+    ['string']      = { 'of' },
+    ['number']      = { 'of', 'pattern' },
+    ['unsigned']    = { 'of', 'pattern' },
+    ['int']         = { 'of', 'pattern' },
+    ['uint']        = { 'of', 'pattern' },
+    ['boolean']     = { 'of', 'min', 'max', 'pattern', 'unique' },
     ['enum']        = { 'min', 'max', 'pattern' },
-    --['struct']  = { 'min', 'max', 'pattern', 'default' }
+    ['struct']      = { 'min', 'max', 'pattern', 'default' }
+};
+
+local ISA_OF = {
+    ['enum']        = require('lschema.ddl.enum'),
+    ['struct']      = require('lschema.ddl.struct')
 };
 
 local CONSTRAINT_NUMBER = {
@@ -64,11 +90,11 @@ local CONSTRAINT_NUMBER = {
 --- initializer
 -- @param   ddl     ddl
 -- @param   isa     string | number | unsigned | int | uint | boolean | enum | array
--- @param   rel     relation name if isa is table | enum
-function ISA:init( isa, rel )
+function ISA:init( isa )
+    local internal = protected( self );
     local index = AUX.getIndex( self );
     local methods = ISA_TYPE[isa];
-    local check, i, method;
+    local i, method;
     
     AUX.abort( 
         not methods, 
@@ -79,22 +105,26 @@ function ISA:init( isa, rel )
     -- set isa
     rawset( index, 'isa', isa );
     -- create instance of Check class
-    check = Check.new( isa );
-    rawset( index, '_check', check );
-    -- check relation
-    if isa == 'enum' then
-        self:abort( 
-            not halo.instanceof( rel, Enum ), 
-            '%s %q is not defined', isa, rel
-        );
-        -- set reference of related instance
-        rawset( index, 'rel', rel );
-    end
-
+    rawset( internal, 'check', Check.new( isa ) );
     -- remove unused methods
     for i, method in ipairs( methods ) do
         rawset( index, method, nil );
     end
+    
+    return self;
+end
+
+--- of: enum, struct
+function ISA:of( val )
+    local class = ISA_OF[self.isa];
+
+    -- check instanceof
+    AUX.abort( 
+        not halo.instanceof( val, class ), 
+        'value must be instance of %q class', isa
+    );
+    
+    rawset( AUX.getIndex( self ), 'of', val );
     
     return self;
 end
@@ -136,8 +166,8 @@ function ISA:min( val )
         );
     end
     
-    self._check:min( val );
     rawset( AUX.getIndex( self ), 'min', val );
+    protected( self ).check:min( val );
     
     return self;
 end
@@ -162,8 +192,8 @@ function ISA:max( val )
         );
     end
     
-    self._check:max( val );
     rawset( AUX.getIndex( self ), 'max', val );
+    protected( self ).check:max( val );
     
     return self;
 end
@@ -175,8 +205,8 @@ function ISA:pattern( val )
         not halo.instanceof( val, Pattern ), 
         'pattern must be instance of Pattern'
     );
-    self._check:pattern( val );
     rawset( AUX.getIndex( self ), 'pattern', val );
+    protected( self ).check:pattern( val );
     
     return self;
 end
@@ -205,22 +235,23 @@ function ISA:default( val )
         );
     end
     
-    rawset( self:getIndex(), 'default', val );
-    self._check:default( val );
+    rawset( AUX.getIndex( self ), 'default', val );
+    protected( self ).check:default( val );
     
     return self;
 end
 
-
 function ISA:makeCheck()
-    local check = index._check;
     local index = AUX.getIndex( self );
+    local internal = protected( self );
+    local check = rawget( internal, 'check' );
+    local valof = rawget( index, 'of' );
     local fn;
     
-    if rawget( index, 'rel' ) then
-        check[index.isa]( check, index.rel.fields );
+    if valof then
+        check[index.isa]( check, valof );
         -- remove related instance
-        rawset( index, 'rel', nil );
+        rawset( index, 'of', nil );
     end
     
     -- make check function
@@ -228,10 +259,8 @@ function ISA:makeCheck()
     -- set generated function to __call metamethod
     AUX.setCallMethod( self, fn );
     -- remove instance of Check class
-    rawset( index, '_check', nil );
+    rawset( internal, 'check', nil );
     -- remove unused methods
-    -- save check function
-    rawset( index, 'check', fn );
     AUX.discardMethods( self );
 end
 
