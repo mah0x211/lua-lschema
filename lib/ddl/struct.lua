@@ -42,50 +42,28 @@ Struct.inherits {
     }
 };
 
-
-local TMPL_ENV = {
-    type = type,
-    pairs = pairs,
-    rawset = rawset
-};
-local TMPL = [[
-local type = type;
-local pairs = pairs;
-local rawset = rawset;
-local check = {};
-function check:verify( tbl )
+--[[
+    MARK: Metamethod
+--]]
+function Struct:__call( tbl )
     if type( tbl ) == 'table' then
         local errtbl = {};
-        local field, val, err, gotError;
+        local field, verify, val, err, gotError;
         
-        for field, val in pairs( self.fields ) do
-            val, err = val( tbl[field] );
-            if v then
-                tbl[field] = v;
-            else
+        for field, verify in pairs( self.fields ) do
+            val, err = verify( tbl[field] );
+            if err then
                 rawset( errtbl, field, err );
                 gotError = true;
+            else
+                tbl[field] = val;
             end
         end
         
         return tbl, gotError and errtbl or nil;
     end
     
-    return nil, ETYPE;
-end
-
-return check.verify;
-]];
-
--- append errno
-do 
-    local errno = {};
-    local k,v;
-    
-    for k,v in pairs( require('lschema.ddl.errno') ) do
-        rawset( errno, #errno + 1, ('local %s = %d;'):format( k, v ) );
-    end
-    TMPL = table.concat( errno, '\n' ) .. TMPL;
+    return nil, errno.ETYPE;
 end
 
 
@@ -119,13 +97,8 @@ function Struct:init( tbl )
         rawset( index, id, isa );
     end
     
-    -- generate function
-    tmpl, err = eval( TMPL, TMPL_ENV );
-    assert( not err, err );
-    -- set generated function to __call metamethod
-    AUX.setCallMethod( self, tmpl() );
     AUX.discardMethods( self );
-    
+
     return self;
 end
 
