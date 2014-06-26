@@ -114,7 +114,6 @@ local function discardMethods( obj )
         end
     end
     
-    -- replace fields
     rawset( index, 'fields', fields );
 end
 

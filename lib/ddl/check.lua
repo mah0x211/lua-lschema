@@ -62,6 +62,10 @@ local TMPL_LOC = {
     end
     ]],
     
+    struct = [[-- struct
+    return verify( val );
+    ]],
+    
     pattern = [[-- PATTERN
     if not pattern:exec( val ) then
         return nil, EPAT;
@@ -85,6 +89,7 @@ local TMPL_FUNC = [[
 local pattern = pattern;
 local type = type;
 local typeof = typeof;
+local verify = verify;
 local check = {};
 function check:verify( val )
     if val == nil then
@@ -98,7 +103,7 @@ function check:verify( val )
     %PATTERN
     %ENUM
     
-    return val;
+    %STRUCT
 end
 
 return check.verify;
@@ -120,11 +125,12 @@ function Check:init( isa )
     self.minmax = {};
     self.repls = {
         ['%NOTNULL']    = '',
-        ['%DEFAULT']    = 'return true',
+        ['%DEFAULT']    = 'return val',
         ['%ISA']        = '',
         ['%MINMAX']     = '',
         ['%PATTERN']    = '',
-        ['%ENUM']       = ''
+        ['%ENUM']       = '',
+        ['%STRUCT']     = 'return val'
     };
     self.env = {
         type        = type,
@@ -173,6 +179,11 @@ function Check:enum( enum )
     ) .. self.tmpl;
 end
 
+function Check:struct( struct )
+    self.repls['%ISA'] = TMPL_LOC.isa.primitive:format('table');
+    self.repls['%STRUCT'] = TMPL_LOC.struct;
+    rawset( self.env, 'verify', struct );
+end
 
 function Check:make()
     local tmpl = self.tmpl;
