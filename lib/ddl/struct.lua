@@ -73,7 +73,7 @@ end
 function Struct:init( tbl )
     local ISA = require('lschema.ddl.isa');
     local index = AUX.getIndex( self );
-    local id, isa, tmpl, err;
+    local id, isa, hasFields;
     
     AUX.abort( 
         not typeof.table( tbl ), 
@@ -95,7 +95,14 @@ function Struct:init( tbl )
         end
         
         rawset( index, id, isa );
+        hasFields = true;
     end
+    
+    AUX.abort( 
+        not hasFields,
+        'cannot create empty struct'
+    );
+
     
     AUX.discardMethods( self );
 
