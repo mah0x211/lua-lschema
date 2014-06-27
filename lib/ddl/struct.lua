@@ -27,9 +27,9 @@
 
 --]]
 local halo = require('halo');
-local eval = require('util').eval;
 local typeof = require('util.typeof');
 local AUX = require('lschema.aux');
+local Template = require('lschema.ddl.template');
 local Struct = halo.class.Struct;
 
 Struct.inherits {
@@ -43,37 +43,12 @@ Struct.inherits {
 };
 
 --[[
-    MARK: Metamethod
---]]
-function Struct:__call( tbl )
-    if type( tbl ) == 'table' then
-        local errtbl = {};
-        local field, verify, val, err, gotError;
-        
-        for field, verify in pairs( self.fields ) do
-            val, err = verify( tbl[field] );
-            if err then
-                rawset( errtbl, field, err );
-                gotError = true;
-            else
-                tbl[field] = val;
-            end
-        end
-        
-        return tbl, gotError and errtbl or nil;
-    end
-    
-    return nil, errno.ETYPE;
-end
-
-
---[[
     MARK: Method
 --]]
 function Struct:init( tbl )
     local ISA = require('lschema.ddl.isa');
     local index = AUX.getIndex( self );
-    local id, isa, hasFields;
+    local id, isa, hasFields, fn;
     
     AUX.abort( 
         not typeof.table( tbl ), 
@@ -102,10 +77,12 @@ function Struct:init( tbl )
         not hasFields,
         'cannot create empty struct'
     );
-
     
-    AUX.discardMethods( self );
-
+    -- make check function
+    fn = Template.renderStruct( AUX.discardMethods( self ) );
+    -- set generated function to __call metamethod
+    AUX.setCallMethod( self, fn );
+    
     return self;
 end
 
