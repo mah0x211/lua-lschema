@@ -274,7 +274,7 @@ function ISA:default( val )
     
     if isa == 'enum' then
         AUX.abort( 
-            not rawget( self.enum.fields, val ), 
+            not self.enum( val ), 
             'default value %q is not defined at enum', val 
         );
     end
