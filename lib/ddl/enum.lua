@@ -30,6 +30,7 @@
 local halo = require('halo');
 local typeof = require('util.typeof');
 local AUX = require('lschema.aux');
+local Template = require('lschema.ddl.template');
 local Enum = halo.class.Enum;
 
 Enum.inherits {
@@ -48,7 +49,7 @@ Enum.inherits {
 --]]
 function Enum:init( tbl )
     local index = AUX.getIndex( self );
-    local id, val;
+    local id, val, fn;
     
     AUX.abort( 
         not typeof.table( tbl ), 
@@ -72,6 +73,10 @@ function Enum:init( tbl )
     end
     
     AUX.discardMethods( self );
+    -- make check function
+    fn = Template.renderEnum( rawget( index, 'fields' ), {} );
+    -- set generated function to __call metamethod
+    AUX.setCallMethod( self, fn );
     
     return self;
 end
