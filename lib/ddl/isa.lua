@@ -132,6 +132,8 @@ end
 
 --- not null
 function ISA:notNull( ... )
+    local index = AUX.getIndex( self );
+    
     AUX.abort( 
         ISA_OF[self.isa] and typeof.Function( self.of ), 
         ('%q must be set "of" attribute before other attributes'):format( self.isa )
@@ -140,7 +142,8 @@ function ISA:notNull( ... )
         #{...} > 0, 
         'should not pass argument' 
     );
-    rawset( AUX.getIndex( self ), 'notNull', true );
+    rawset( index, 'notNull', true );
+    rawset( index, 'default', nil );
     protected( self ).check:notNull();
     return self;
 end
@@ -225,6 +228,7 @@ function ISA:default( val )
     local isa = self.isa == 'enum' and 'string' or 
                 self.isa == 'number' and 'finite' or
                 self.isa;
+    local index = AUX.getIndex( self );
     
     AUX.abort( 
         ISA_OF[self.isa] and typeof.Function( self.of ), 
@@ -246,7 +250,8 @@ function ISA:default( val )
         );
     end
     
-    rawset( AUX.getIndex( self ), 'default', val );
+    rawset( index, 'default', val );
+    rawset( index, 'notNull', nil );
     protected( self ).check:default( val );
     
     return self;
