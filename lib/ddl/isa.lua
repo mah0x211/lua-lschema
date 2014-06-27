@@ -29,7 +29,7 @@
 local halo = require('halo');
 local typeof = require('util.typeof');
 local AUX = require('lschema.aux');
-local Check = require('lschema.ddl.check');
+local Template = require('lschema.ddl.template');
 local Pattern = require('lschema.ddl.pattern');
 local ISA = halo.class.ISA;
 
@@ -66,14 +66,19 @@ ISA.inherits {
 -------------------------------------------------------------------------
 --]]
 local ISA_TYPE = {
-    ['string']      = { 'of' },
-    ['number']      = { 'of', 'pattern' },
-    ['unsigned']    = { 'of', 'pattern' },
-    ['int']         = { 'of', 'pattern' },
-    ['uint']        = { 'of', 'pattern' },
-    ['boolean']     = { 'of', 'min', 'max', 'pattern', 'unique' },
-    ['enum']        = { 'min', 'max', 'pattern' },
-    ['struct']      = { 'min', 'max', 'pattern', 'default' }
+    ['string']      = { 'of', 'len' },
+    ['number']      = { 'of', 'len', 'pattern' },
+    ['unsigned']    = { 'of', 'len', 'pattern' },
+    ['int']         = { 'of', 'len', 'pattern' },
+    ['uint']        = { 'of', 'len', 'pattern' },
+    ['boolean']     = { 'of', 'len', 'min', 'max', 'pattern', 'unique' },
+    ['enum']        = { 'len', 'min', 'max', 'pattern' },
+    ['struct']      = { 'len', 'min', 'max', 'pattern', 'default' }
+};
+
+local ISA_AKA = {
+    ['number']  = 'finite',
+    ['enum']    = 'string'
 };
 
 local ISA_OF = {
@@ -81,34 +86,50 @@ local ISA_OF = {
     ['struct']      = require('lschema.ddl.struct')
 };
 
-local CONSTRAINT_NUMBER = {
-    ['unsigned']    = true,
-    ['int']         = true,
-    ['uint']        = true
-};
+local function checkOfAttr( index, isa )
+    if isa == 'enum' or isa == 'struct' then
+        AUX.abort( 
+            rawget( index, isa ) == nil, 
+            ('%q must be set "of" attribute before other attributes')
+            :format( isa )
+        );
+    end
+end
+
 
 --- initializer
 -- @param   ddl ddl
 -- @param   isa string | number | unsigned | int | uint | boolean | enum | struct
 function ISA:init( isa )
-    local internal = protected( self );
     local index = AUX.getIndex( self );
-    local methods = ISA_TYPE[isa];
-    local i, method;
-    
+    local asArray, methods, i, method;
+
     AUX.abort( 
-        not methods, 
+        not typeof.string( isa ), 
+        'argument must be type of string'
+    );
+    
+    -- extract array symbol
+    isa, asArray = isa:match( '^(%a+)([^%a]*)$' );
+    if asArray == '' then
+        asArray = nil;
+    end
+    
+    methods = ISA_TYPE[isa];
+    AUX.abort( 
+        not methods or asArray and asArray ~= '[]', 
         'data type must be typeof %s',
         'string | number | unsigned | int | uint | boolean | enum'
     );
     
     -- set isa
     rawset( index, 'isa', isa );
-    -- create instance of Check class
-    rawset( internal, 'check', Check.new( isa ) );
+    rawset( index, 'asArray', asArray ~= nil );
     -- remove unused methods
     for i, method in ipairs( methods ) do
-        rawset( index, method, nil );
+        if method ~= 'len' or not asArray then
+            rawset( index, method, nil );
+        end
     end
     
     return self;
@@ -116,6 +137,7 @@ end
 
 --- of: enum, struct
 function ISA:of( val )
+    local index = AUX.getIndex( self );
     local class = ISA_OF[self.isa];
     
     -- check instanceof
@@ -124,27 +146,50 @@ function ISA:of( val )
         'value must be instance of %q class', isa
     );
     
-    rawset( AUX.getIndex( self ), 'of', val );
+    rawset( index, self.isa, val );
+    rawset( index, 'of', nil );
     
     return self;
 end
 
 
+--- len
+function ISA:len( min, max )
+    local index = AUX.getIndex( self );
+    
+    checkOfAttr( index, self.isa );
+    AUX.abort( 
+        not typeof.uint( min ), 
+        'min value of array length must be type of unsigned integer'
+    );
+    if max ~= nil then
+        AUX.abort( 
+            max and not typeof.uint( max ), 
+            'max value of array length must be type of unsigned integer'
+        );
+        AUX.abort( 
+            max < min, 
+            'max value of array length must be greater than min value of length'
+        );
+    end
+    
+    rawset( index, 'len', { min = min, max = max } );
+    
+    return self;
+end
+
 --- not null
 function ISA:notNull( ... )
     local index = AUX.getIndex( self );
     
-    AUX.abort( 
-        ISA_OF[self.isa] and typeof.Function( self.of ), 
-        ('%q must be set "of" attribute before other attributes'):format( self.isa )
-    );
+    checkOfAttr( index, self.isa );
     AUX.abort( 
         #{...} > 0, 
         'should not pass argument' 
     );
     rawset( index, 'notNull', true );
     rawset( index, 'default', nil );
-    protected( self ).check:notNull();
+    
     return self;
 end
 
@@ -153,6 +198,7 @@ end
 function ISA:unique( ... )
     AUX.abort( #{...} > 0, 'should not pass argument' );
     rawset( AUX.getIndex( self ), 'unique', true );
+    
     return self;
 end
 
@@ -160,24 +206,20 @@ end
 --- min
 -- @param   val number of minimum
 function ISA:min( val )
+    local numType = self.isa == 'string' and 'uint' or 
+                    self.isa == 'number' and 'finite' or
+                    self.isa;
+    
     AUX.abort( 
-        not typeof.finite( val ), 
-        'min %q must be finite number', val 
+        not typeof[numType]( val ), 
+        'min %q must be %s number', val, numType
     );
     AUX.abort( 
-        typeof.finite( self.max ) == 'number' and val > self.max, 
+        typeof[numType]( self.max ) and val > self.max, 
         'min %d must be less than max: %d', val, self.max
     );
     
-    if CONSTRAINT_NUMBER[self.isa] then
-        AUX.abort( 
-            not typeof[self.isa]( val ), 
-            'min %d must be type of %d', val, self.isa
-        );
-    end
-    
     rawset( AUX.getIndex( self ), 'min', val );
-    protected( self ).check:min( val );
     
     return self;
 end
@@ -186,24 +228,20 @@ end
 --- max
 -- @param   val number of maxium
 function ISA:max( val )
+    local numType = self.isa == 'string' and 'uint' or 
+                    self.isa == 'number' and 'finite' or
+                    self.isa;
+    
     AUX.abort( 
-        not typeof.finite( val ), 
-        'max %q must be finite number', val 
+        not typeof[numType]( val ), 
+        'max %q must be %s number', val, numType
     );
     AUX.abort( 
-        typeof.finite( self.min ) and val < self.min, 
+        typeof[numType]( self.min ) and val < self.min, 
         'max %d must be greater than min: %d', val, self.min
     );
     
-    if CONSTRAINT_NUMBER[self.isa] then
-        AUX.abort( 
-            not typeof[self.isa]( val ), 
-            'max %d must be type of %d', val, self.isa
-        );
-    end
-    
     rawset( AUX.getIndex( self ), 'max', val );
-    protected( self ).check:max( val );
     
     return self;
 end
@@ -216,7 +254,6 @@ function ISA:pattern( val )
         'pattern must be instance of Pattern'
     );
     rawset( AUX.getIndex( self ), 'pattern', val );
-    protected( self ).check:pattern( val );
     
     return self;
 end
@@ -225,59 +262,53 @@ end
 --- default
 -- @param   val default value
 function ISA:default( val )
-    local isa = self.isa == 'enum' and 'string' or 
-                self.isa == 'number' and 'finite' or
-                self.isa;
     local index = AUX.getIndex( self );
+    local isa = self.isa;
+    local aka = ISA_AKA[isa] or isa;
     
+    checkOfAttr( index, isa );
     AUX.abort( 
-        ISA_OF[self.isa] and typeof.Function( self.of ), 
-        ('%q must be set "of" attribute before other attributes'):format( self.isa )
-    );
-    AUX.abort( 
-        val == nil and self.notNull, 
-        'default value must not be nil' 
-    );
-    AUX.abort( 
-        val ~= nil and not typeof[isa]( val ), 
-        'default value %q must be type of %s', val, isa 
+        not typeof[aka]( val ), 
+        'default value %q must be type of %s', val, aka 
     );
     
-    if self.isa == 'enum' then
+    if isa == 'enum' then
         AUX.abort( 
-            not rawget( self.of.fields, val ), 
+            not rawget( self.enum.fields, val ), 
             'default value %q is not defined at enum', val 
         );
     end
     
     rawset( index, 'default', val );
     rawset( index, 'notNull', nil );
-    protected( self ).check:default( val );
     
     return self;
 end
 
+
 function ISA:makeCheck()
     local index = AUX.getIndex( self );
-    local internal = protected( self );
-    local check = rawget( internal, 'check' );
-    local valof = rawget( index, 'of' );
-    local fn;
+    local isa = self.isa;
+    local env, fields, fn;
     
-    if valof then
-        check[index.isa]( check, valof );
-        -- remove related instance
-        rawset( index, 'of', nil );
-    end
-    
-    -- make check function
-    fn = check:make();
-    -- set generated function to __call metamethod
-    AUX.setCallMethod( self, fn );
-    -- remove instance of Check class
-    rawset( internal, 'check', nil );
+    checkOfAttr( index, isa );
     -- remove unused methods
     AUX.discardMethods( self );
+    fields = rawget( index, 'fields' );
+    -- create environment
+    env = {
+        rawset = rawset, 
+        rawget = rawget,
+        type = type,
+        typeof = typeof,
+        pattern = rawget( fields, 'pattern' ),
+        enum = rawget( fields, 'enum' ),
+        struct = rawget( fields, 'struct' )
+    };
+    -- make check function
+    fn = Template.renderISA( fields, env );
+    -- set generated function to __call metamethod
+    AUX.setCallMethod( self, fn );
 end
 
 
