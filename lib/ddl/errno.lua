@@ -33,6 +33,7 @@ return {
     EMIN        = 3,
     EMAX        = 4,
     EPAT        = 5,
-    EENUM       = 6
+    EENUM       = 6,
+    ELEN        = 7
 };
 
