@@ -293,8 +293,7 @@ function ISA:makeCheck()
     
     checkOfAttr( index, isa );
     -- remove unused methods
-    AUX.discardMethods( self );
-    fields = rawget( index, 'fields' );
+    fields = AUX.discardMethods( self );
     -- create environment
     env = {
         rawset = rawset, 

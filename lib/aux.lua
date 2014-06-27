@@ -114,7 +114,7 @@ local function discardMethods( obj )
         end
     end
     
-    rawset( index, 'fields', fields );
+    return fields;
 end
 
 

@@ -72,9 +72,8 @@ function Enum:init( tbl )
         rawset( index, id, val );
     end
     
-    AUX.discardMethods( self );
     -- make check function
-    fn = Template.renderEnum( rawget( index, 'fields' ), {} );
+    fn = Template.renderEnum( AUX.discardMethods( self ) );
     -- set generated function to __call metamethod
     AUX.setCallMethod( self, fn );
     
