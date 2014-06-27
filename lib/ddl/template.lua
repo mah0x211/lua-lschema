@@ -28,6 +28,8 @@
 --]]
 local halo = require('halo');
 local eval = require('util').eval;
+local inspect = require('util').inspect;
+local keys = require('util.table').keys;
 local tsukuyomi = require('tsukuyomi');
 
 local ISA_AKA = {
@@ -199,12 +201,7 @@ return VERIFIER.proc;
 
 
 local ENUM = [[
-local ENUM = {
-<?for key, val in pairs( $ ) ?>
-    <?put key ?> = <?put val ?>,
-<?end?>
-};
-
+local ENUM = <?put $.fields ?>;
 local VERIFIER = {};
 function VERIFIER:proc( val )
     if not ENUM[val] then
@@ -216,6 +213,41 @@ end
 
 return VERIFIER.proc;
 ]];
+local ENUM_ENV = {};
+
+local STRUCT = [[
+local FIELDS = <?put $.fields ?>
+local NFIELDS = #FIELDS;
+local VERIFIER = {};
+function VERIFIER:proc( tbl )
+    if type( tbl ) == 'table' then
+        local errtbl = {};
+        local idx, field, val, err, gotError;
+        
+        for idx = 1, NFIELDS do
+            field = rawget( FIELDS, idx );
+            val, err = self[field]( tbl[field] );
+            if err then
+                rawset( errtbl, field, err );
+                gotError = true;
+            else
+                tbl[field] = val;
+            end
+        end
+        
+        return tbl, gotError and errtbl or nil;
+    end
+    
+    return nil, errno.ETYPE;
+end
+
+return VERIFIER.proc;
+]];
+local STRUCT_ENV = {
+    type = type,
+    rawget = rawget,
+    rawset = rawset
+};
 
 
 local function put( val )
@@ -236,6 +268,8 @@ do
      assert( not err, err );
      _, err = Template:setPage( 'ENUM', ENUM );
      assert( not err, err );
+     _, err = Template:setPage( 'STRUCT', STRUCT );
+     assert( not err, err );
 end
 
 local function render( label, data, env )
@@ -252,11 +286,21 @@ local function renderISA( data, env )
     return render( data.asArray and 'ISA_ARRAY' or 'ISA', data, env );
 end
 
-local function renderEnum( data, env )
-    return render( 'ENUM', data, env );
+local function renderEnum( fields )
+    return render( 'ENUM', {
+        fields = inspect( fields )
+    }, ENUM_ENV );
+end
+
+local function renderStruct( fields )
+    fields = keys( fields );
+    return render( 'STRUCT', {
+        fields = inspect( fields )
+    }, STRUCT_ENV );
 end
 
 return {
     renderISA = renderISA,
-    renderEnum = renderEnum
+    renderEnum = renderEnum,
+    renderStruct = renderStruct
 };
