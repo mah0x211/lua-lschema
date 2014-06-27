@@ -14,7 +14,8 @@ dependencies = {
     "lua >= 5.1",
     "lrexlib-pcre",
     "util",
-    "halo"
+    "halo",
+    "tsukuyomi"
 }
 build = {
     type = "builtin",
@@ -24,7 +25,7 @@ build = {
         ['lschema.container'] = "lib/container.lua",
         ['lschema.ddl'] = "lib/ddl.lua",
         ['lschema.ddl.errno'] = "lib/ddl/errno.lua",
-        ['lschema.ddl.check'] = "lib/ddl/check.lua",
+        ['lschema.ddl.template'] = "lib/ddl/template.lua",
         ['lschema.ddl.enum'] = "lib/ddl/enum.lua",
         ['lschema.ddl.pattern'] = "lib/ddl/pattern.lua",
         ['lschema.ddl.isa'] = "lib/ddl/isa.lua",
