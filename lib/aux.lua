@@ -98,6 +98,28 @@ local function isValidIdent( obj, id )
 end
 
 
+local function getAttrs( fields )
+    local attr = {};
+    local k,v;
+
+    -- create attribute table
+    for k,v in pairs( fields ) do
+        if k == 'pattern' and typeof.userdata( v ) then
+            attr[k] = v['.attr'];
+        elseif typeof.table( v ) then
+            attr[k] = v['.attr'];
+        elseif typeof.boolean( v ) then
+            if v then
+                attr[k] = v;
+            end
+        else
+            attr[k] = v;
+        end
+    end
+    
+    return attr;
+end
+
 --- remove all methods
 local function discardMethods( obj )
     local index = getIndex( obj );
@@ -113,6 +135,8 @@ local function discardMethods( obj )
             end
         end
     end
+    
+    rawset( index, '.attr', getAttrs( fields ) );
     
     return fields;
 end
