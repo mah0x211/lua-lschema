@@ -27,7 +27,8 @@
 
 --]]
 local halo = require('halo');
-local typeof = require('util.typeof');
+local util = require('util');
+local typeof = util.typeof;
 local AUX = require('lschema.aux');
 local Template = require('lschema.ddl.template');
 local Pattern = require('lschema.ddl.pattern');
@@ -304,6 +305,7 @@ function ISA:makeCheck()
         enum = rawget( fields, 'enum' ),
         struct = rawget( fields, 'struct' )
     };
+    fields.attr = util.inspect( index['.attr'] );
     -- make check function
     fn = Template.renderISA( fields, env );
     -- set generated function to __call metamethod

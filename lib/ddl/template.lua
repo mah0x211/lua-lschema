@@ -50,6 +50,7 @@ local TMPL_CHUNKS = {
 -- PREPARE
 local type = type;
 local typeof = typeof;
+<?if $.attr ?>local ATTR = <?put $.attr ?>;<?end?>
 <?if $.struct ?>local struct = struct;<?end?>
 <?if $.pattern ?>local pattern = pattern;<?end?>
 <?if $.enum ?>local enum = enum;<?end?>
@@ -63,17 +64,29 @@ local VERIFIER = {};
         len = #val;
 <?if $.min == $.max ?>
         if len ~= <?put $.min ?> then
-            return nil, <?put errno.EMIN ?>;
+            return nil, {
+                errno = <?put errno.EMIN ?>, 
+                etype = 'EMIN',
+                attr = ATTR
+            };
         end
 <?else?>
 <?if $.min ?>
         if len < <?put $.min ?> then
-            return nil, <?put errno.EMIN ?>;
+            return nil, { 
+                errno = <?put errno.EMIN ?>, 
+                etype = 'EMIN',
+                attr = ATTR
+            };
         end
 <?end?>
 <?if $.max ?>
         if len > <?put $.max ?> then
-            return nil, <?put errno.EMAX ?>;
+            return nil, { 
+                errno = <?put errno.EMAX ?>,
+                etype = 'EMAX',
+                attr = ATTR
+            };
         end
 <?end?>
 <?end?>
@@ -84,7 +97,11 @@ local VERIFIER = {};
 <?if $.pattern ?>
         -- PATTERN
         if not pattern:exec( val ) then
-            return nil, <?put errno.EPAT ?>;
+            return nil, {
+                errno = <?put errno.EPAT ?>, 
+                etype = 'EPAT',
+                attr = ATTR
+            };
         end
 <?end?>
 ]],
@@ -93,7 +110,11 @@ local VERIFIER = {};
 <?if $.enum ?>
         -- ENUM
         if not enum( val ) then
-            return nil, <?put errno.EENUM ?>;
+            return nil, { 
+                errno = <?put errno.EENUM ?>,
+                etype = 'EENUM',
+                attr = ATTR
+            };
         end
 <?end?>
 ]],
@@ -119,7 +140,11 @@ function VERIFIER:proc( val )
         local len;
 <?end?>
         if not typeof.<?put AKA[$.isa] or $.isa ?>( val ) then
-            return nil, <?put errno.ETYPE ?>;
+            return nil, { 
+                errno = <?put errno.ETYPE ?>, 
+                etype = 'ETYPE',
+                attr = ATTR
+            };
         end
 
 #MINMAX
@@ -130,7 +155,11 @@ function VERIFIER:proc( val )
     
 <?if $.notNull ?>
     -- not null
-    return nil, <?put errno.ENULL ?>;
+    return nil, { 
+        errno = <?put errno.ENULL ?>, 
+        etype = 'ENULL',
+        attr = ATTR
+    };
 <?elseif $.default ?>
     -- default
     return <?$put $.default ?>;
@@ -147,7 +176,11 @@ local ISA_ARRAY = ([[
 
 local function checkVal( val )
     if not typeof.<?put AKA[$.isa] or $.isa ?>( val ) then
-        return nil, <?put errno.ETYPE ?>;
+        return nil, { 
+            errno = <?put errno.ETYPE ?>,
+            etype = 'ETYPE',
+            attr = ATTR
+        };
     end
 
 #MINMAX
@@ -163,7 +196,11 @@ function VERIFIER:proc( arr )
         local len, idx, val, res, err, gotError;
         
         if type( arr ) ~= 'table' then
-            return nil, <?put errno.ETYPE ?>;
+            return nil, { 
+                errno = <?put errno.ETYPE ?>,
+                etype = 'ETYPE',
+                attr = ATTR
+            };
         end
         
         len = #arr;
@@ -171,7 +208,11 @@ function VERIFIER:proc( arr )
         -- length 
         if len < <?put $.len.min ?> <?if $.len.max 
         ?>or len > <?put $.len.max ?><?end?> then
-            return nil, <?put errno.ELEN ?>;
+            return nil, { 
+                errno = <?put errno.ELEN ?>,
+                etype = 'ELEN',
+                attr = ATTR
+            };
         end
 <?end?>
         for idx = 1, len do
@@ -190,7 +231,11 @@ function VERIFIER:proc( arr )
     
 <?if $.notNull ?>
     -- not null
-    return nil, <?put errno.ENULL ?>;
+    return nil, { 
+        errno = <?put errno.ENULL ?>,
+        etype = 'ENULL',
+        attr = ATTR
+    };
 <?else?>
     return arr;
 <?end?>
