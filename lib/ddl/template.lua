@@ -262,14 +262,14 @@ Template:setCommand( 'put', put, true );
 do
     local _, err;
     
-     _, err = Template:setPage( 'ISA', ISA );
-     assert( not err, err );
-     _, err = Template:setPage( 'ISA_ARRAY', ISA_ARRAY );
-     assert( not err, err );
-     _, err = Template:setPage( 'ENUM', ENUM );
-     assert( not err, err );
-     _, err = Template:setPage( 'STRUCT', STRUCT );
-     assert( not err, err );
+    _, err = Template:setPage( 'ISA', ISA );
+    assert( not err, err );
+    _, err = Template:setPage( 'ISA_ARRAY', ISA_ARRAY );
+    assert( not err, err );
+    _, err = Template:setPage( 'ENUM', ENUM );
+    assert( not err, err );
+    _, err = Template:setPage( 'STRUCT', STRUCT );
+    assert( not err, err );
 end
 
 local function render( label, data, env )
