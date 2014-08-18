@@ -282,8 +282,8 @@ local function render( label, data, env )
     return fn();
 end
 
-local function renderISA( data, env )
-    return render( data.asArray and 'ISA_ARRAY' or 'ISA', data, env );
+local function renderISA( fields, env )
+    return render( fields.asArray and 'ISA_ARRAY' or 'ISA', fields, env );
 end
 
 local function renderEnum( fields )
