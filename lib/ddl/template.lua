@@ -50,7 +50,7 @@ local TMPL_CHUNKS = {
 -- PREPARE
 local type = type;
 local typeof = typeof;
-<?if $.attr ?>local ATTR = <?put $.attr ?>;<?end?>
+local ATTR = <?put $.attr ?>;
 <?if $.struct ?>local struct = struct;<?end?>
 <?if $.pattern ?>local pattern = pattern;<?end?>
 <?if $.enum ?>local enum = enum;<?end?>
