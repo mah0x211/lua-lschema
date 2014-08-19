@@ -246,11 +246,16 @@ return VERIFIER.proc;
 
 
 local ENUM = [[
+local ATTR = <?put $.attr ?>;
 local ENUM = <?put $.fields ?>;
 local VERIFIER = {};
 function VERIFIER:proc( val )
     if not ENUM[val] then
-        return nil, <?put errno.EENUM ?>;
+        return nil, {
+            errno = <?put errno.EENUM ?>,
+            etype = 'EENUM',
+            attr = ATTR
+        };
     end
     
     return val;
@@ -331,9 +336,10 @@ local function renderISA( fields, env )
     return render( fields.asArray and 'ISA_ARRAY' or 'ISA', fields, env );
 end
 
-local function renderEnum( fields )
+local function renderEnum( fields, attr )
     return render( 'ENUM', {
-        fields = inspect( fields )
+        fields = inspect( fields ),
+        attr = inspect( attr )
     }, ENUM_ENV );
 end
 
