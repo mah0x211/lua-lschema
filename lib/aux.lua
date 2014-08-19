@@ -107,7 +107,7 @@ local function getAttrs( fields )
         if k == 'pattern' and typeof.userdata( v ) then
             attr[k] = v['.attr'];
         elseif typeof.table( v ) then
-            attr[k] = v['.attr'];
+            attr[k] = v['.attr'] or v;
         elseif typeof.boolean( v ) then
             if v then
                 attr[k] = v;
