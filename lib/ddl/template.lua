@@ -266,6 +266,7 @@ return VERIFIER.proc;
 local ENUM_ENV = {};
 
 local STRUCT = [[
+local ATTR = <?put $.attr ?>;
 local FIELDS = <?put $.fields ?>
 local NFIELDS = #FIELDS;
 local VERIFIER = {};
@@ -288,7 +289,11 @@ function VERIFIER:proc( tbl )
         return tbl, gotError and errtbl or nil;
     end
     
-    return nil, errno.ETYPE;
+    return nil, { 
+        errno = <?put errno.ETYPE ?>,
+        etype = 'ETYPE',
+        attr = ATTR
+    };
 end
 
 return VERIFIER.proc;
@@ -343,10 +348,11 @@ local function renderEnum( fields, attr )
     }, ENUM_ENV );
 end
 
-local function renderStruct( fields )
+local function renderStruct( fields, attr )
     fields = keys( fields );
     return render( 'STRUCT', {
-        fields = inspect( fields )
+        fields = inspect( fields ),
+        attr = inspect( attr )
     }, STRUCT_ENV );
 end
 

@@ -79,7 +79,7 @@ function Struct:init( tbl )
     );
     
     -- make check function
-    fn = Template.renderStruct( AUX.discardMethods( self ) );
+    fn = Template.renderStruct( AUX.discardMethods( self ), index['.attr'] );
     -- set generated function to __call metamethod
     AUX.setCallMethod( self, fn );
     
