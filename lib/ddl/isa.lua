@@ -249,10 +249,19 @@ end
 
 -- pattern
 function ISA:pattern( val )
-    AUX.abort( 
+    AUX.abort(
         not halo.instanceof( val, Pattern ), 
         'pattern must be instance of Pattern'
     );
+    
+    if not typeof.Function( self.default ) then
+        AUX.abort(
+             not val:exec( self.default ),
+            'pattern %q does not match to default value %q',
+            val['.name'], self.default
+        );
+    end
+    
     rawset( AUX.getIndex( self ), 'pattern', val );
     
     return self;
