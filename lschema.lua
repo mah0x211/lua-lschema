@@ -58,12 +58,10 @@ Schema:property {
 --]]
 function Schema:init( name )
     local index = AUX.getIndex( self );
-    local ddl;
     
     AUX.isValidIdent( self, name );
     self.name = name;
-    ddl = DDL.new();
-    rawset( index, 'ddl', ddl );
+    rawset( index, 'ddl', DDL.new() );
     
     return self;
 end

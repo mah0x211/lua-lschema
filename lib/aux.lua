@@ -104,7 +104,7 @@ local function getAttrs( fields )
 
     -- create attribute table
     for k,v in pairs( fields ) do
-        if k == 'pattern' and typeof.userdata( v ) then
+        if k == 'pattern' then
             attr[k] = v['.attr'];
         elseif typeof.table( v ) then
             attr[k] = v['.attr'] or v;
