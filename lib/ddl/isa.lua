@@ -189,7 +189,6 @@ function ISA:notNull( ... )
         'should not pass argument' 
     );
     rawset( index, 'notNull', true );
-    rawset( index, 'default', nil );
     
     return self;
 end
@@ -281,7 +280,6 @@ function ISA:default( val )
     end
     
     rawset( index, 'default', val );
-    rawset( index, 'notNull', nil );
     
     return self;
 end
