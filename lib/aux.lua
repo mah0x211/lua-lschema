@@ -26,9 +26,9 @@
   Created by Masatoshi Teruya on 14/06/25.
 
 --]]
-
+local util = require('util');
+local typeof = util.typeof;
 local halo = require('halo');
-local typeof = require('util.typeof');
 local AUX = halo.class.AUX;
 
 
@@ -46,24 +46,25 @@ end
 --[[
     MARK: Class Method
 --]]
+local function getUserStackIndex()
+    local list = util.string.split( debug.traceback(), '\n' );
+    local idx, line;
+    
+    for idx = 2, #list do
+        line = list[idx];
+        if not line:find( '(tail call)', 1, true ) and
+           not line:find( '/lschema.lua', 1, true ) and
+           not line:find( '/lschema/', 1, true ) then
+            return idx - 2;
+        end
+    end
+    
+    return nil;
+end
+
 local function abort( exp, fmt, ... )
     if exp then
-        error( string.format( fmt, ... ) );
-        --[[
-        local i = 0;
-        local line;
-        
-        fmt = string.format( fmt, ... );
-        for line in string.gmatch( debug.traceback(), '[^\n]+' ) do
-            if i > 0 and not line:find( '/lschema/', 1, true ) then
-                fmt = line:gsub( '%s*(.+)([%d]+:%s*).+', '%1%2' .. fmt );
-                break;
-            end
-            i = i + 1;
-        end
-        
-        error( fmt, 0 );
-        --]]
+        error( string.format( fmt, ... ), getUserStackIndex() );
     end
 end
 
