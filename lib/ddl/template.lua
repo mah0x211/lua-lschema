@@ -37,17 +37,33 @@ local ISA_AKA = {
     ['enum']    = 'string',
     ['struct']  = 'table'
 };
+
+local ISA_TYPE_CONV = {
+    ['string']      = 'tostring',
+    ['number']      = 'tonumber',
+    ['unsigned']    = 'tonumber',
+    ['int']         = 'tonumber',
+    ['uint']        = 'tonumber',
+    ['boolean']     = 'toboolean'
+};
+
+
 local SANDBOX = {
-    pairs = pairs,
-    table = table,
-    errno = require('lschema.ddl.errno'),
-    AKA = ISA_AKA
+    pairs       = pairs,
+    table       = table,
+    errno       = require('lschema.ddl.errno'),
+    AKA         = ISA_AKA,
+    TYPE_CONV   = ISA_TYPE_CONV
 };
 
 -- template chunks
 local TMPL_CHUNKS = {
     ['#PREPARE'] = [[
+-- ISA: <?put $.isa ?>
 -- PREPARE
+local tostring = tostring;
+local tonumber = tonumber;
+local toboolean = toboolean;
 local type = type;
 local typeof = typeof;
 local ATTR = <?put $.attr ?>;
@@ -122,23 +138,38 @@ local VERIFIER = {};
     ['#STRUCT'] = [[
 <?if $.struct ?>
         -- struct
-        return struct( val );
+        return struct( val, typeconv );
 <?else?>
         return val;
+<?end?>
+]],
+
+    ['#TYPECONV'] = [[
+<?code converter = TYPE_CONV[$.isa] ?>
+<?if converter ?>
+    -- <?put converter ?>
+    if typeconv == true
+       <?if $.isa == 'boolean' ?>and type( val ) ~= 'boolean'
+       <?elseif $.isa == 'string' ?>and type( val ) ~= 'string'
+       <?else?>and type( val ) ~= 'number'<?end?>
+    then
+        val = <?put converter ?>( val );
+    end
 <?end?>
 ]]
 };
 
 
 local ISA = ([[
--- ISA: <?put $.isa ?>
-
 #PREPARE
-function VERIFIER:proc( val )
+function VERIFIER:proc( val, typeconv )
     if val ~= nil then
 <?if $.min or $.max ?>
         local len;
 <?end?>
+
+#TYPECONV
+
         if not typeof.<?put AKA[$.isa] or $.isa ?>( val ) then
             return nil, { 
                 errno = <?put errno.ETYPE ?>, 
@@ -174,7 +205,10 @@ return VERIFIER.proc;
 local ISA_ARRAY = ([[
 #PREPARE
 
-local function checkVal( val )
+local function checkVal( val, typeconv )
+
+#TYPECONV
+
     if not typeof.<?put AKA[$.isa] or $.isa ?>( val ) then
         return nil, { 
             errno = <?put errno.ETYPE ?>,
@@ -190,7 +224,7 @@ local function checkVal( val )
 
 end
 
-function VERIFIER:proc( arr )
+function VERIFIER:proc( arr, typeconv )
     if arr ~= nil then
         local errtbl = {};
         local len, idx, val, res, err, gotError;
@@ -217,7 +251,7 @@ function VERIFIER:proc( arr )
 <?end?>
         for idx = 1, len do
             val = rawget( arr, idx );
-            res, err = checkVal( val );
+            res, err = checkVal( val, typeconv );
             if err then
                 rawset( errtbl, idx, err );
                 gotError = true;
@@ -246,6 +280,8 @@ return VERIFIER.proc;
 
 
 local ENUM = [[
+-- enum
+
 local ATTR = <?put $.attr ?>;
 local ENUM = <?put $.fields ?>;
 local VERIFIER = {};
@@ -266,18 +302,20 @@ return VERIFIER.proc;
 local ENUM_ENV = {};
 
 local STRUCT = [[
+-- struct
+
 local ATTR = <?put $.attr ?>;
 local FIELDS = <?put $.fields ?>
 local NFIELDS = #FIELDS;
 local VERIFIER = {};
-function VERIFIER:proc( tbl )
+function VERIFIER:proc( tbl, typeconv )
     if type( tbl ) == 'table' then
         local errtbl = {};
         local idx, field, val, err, gotError;
         
         for idx = 1, NFIELDS do
             field = rawget( FIELDS, idx );
-            val, err = self[field]( tbl[field] );
+            val, err = self[field]( tbl[field], typeconv );
             if err then
                 rawset( errtbl, field, err );
                 gotError = true;

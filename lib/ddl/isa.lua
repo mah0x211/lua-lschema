@@ -97,6 +97,20 @@ local function checkOfAttr( index, isa )
     end
 end
 
+local function toboolean( arg )
+    local t = type( arg );
+    
+    if t == 'boolean' then
+        return arg;
+    elseif t == 'string' then
+        if arg == 'true' then
+            return true;
+        elseif arg == 'false' then
+            return false;
+        end
+    end
+end
+
 
 --- initializer
 -- @param   ddl ddl
@@ -313,6 +327,9 @@ function ISA:makeCheck()
     env = {
         rawset = rawset, 
         rawget = rawget,
+        tonumber    = tonumber,
+        tostring    = tostring,
+        toboolean   = toboolean,
         type = type,
         typeof = typeof,
         pattern = rawget( fields, 'pattern' ),
