@@ -33,13 +33,7 @@ local Template = require('lschema.ddl.template');
 local Struct = halo.class.Struct;
 
 Struct.inherits {
-    'lschema.aux.AUX',
-    except = {
-        static = {
-            'isValidIdent', 'getIndex', 'setCall', 'abort', 'discardMethods',
-            'posing'
-        }
-    }
+    'lschema.unchangeable.Unchangeable'
 };
 
 --[[

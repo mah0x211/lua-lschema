@@ -33,13 +33,7 @@ local DDL = require('lschema.ddl');
 local Schema = halo.class.Schema;
 
 Schema.inherits {
-    'lschema.aux.AUX',
-    except = {
-        static = {
-            'isValidIdent', 'getIndex', 'setCall', 'abort', 'discardMethods',
-            'posing'
-        }
-    }
+    'lschema.unchangeable.Unchangeable'
 };
 
 

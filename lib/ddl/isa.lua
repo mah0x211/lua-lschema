@@ -35,13 +35,7 @@ local Pattern = require('lschema.ddl.pattern');
 local ISA = halo.class.ISA;
 
 ISA.inherits {
-    'lschema.aux.AUX',
-    except = {
-        static = {
-            'isValidIdent', 'getIndex', 'setCall', 'abort', 'discardMethods',
-            'posing'
-        }
-    }
+    'lschema.unchangeable.Unchangeable'
 };
 
 

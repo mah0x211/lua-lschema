@@ -32,13 +32,7 @@ local AUX = require('lschema.aux');
 local Container = halo.class.Container;
 
 Container.inherits {
-    'lschema.aux.AUX',
-    except = {
-        static = {
-            'isValidIdent', 'getIndex', 'setCall', 'abort', 'discardMethods',
-            'posing'
-        }
-    }
+    'lschema.unchangeable.Unchangeable'
 };
 
 local CLASS_OF = 'CLASS_OF';

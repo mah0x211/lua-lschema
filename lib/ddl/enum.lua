@@ -34,13 +34,7 @@ local Template = require('lschema.ddl.template');
 local Enum = halo.class.Enum;
 
 Enum.inherits {
-    'lschema.aux.AUX',
-    except = {
-        static = {
-            'isValidIdent', 'getIndex', 'setCall', 'abort', 'discardMethods',
-            'posing'
-        }
-    }
+    'lschema.unchangeable.Unchangeable'
 };
 
 

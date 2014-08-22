@@ -35,13 +35,7 @@ local AUX = require('lschema.aux');
 local Pattern = halo.class.Pattern;
 
 Pattern.inherits {
-    'lschema.aux.AUX',
-    except = {
-        static = {
-            'isValidIdent', 'getIndex', 'setCall', 'abort', 'discardMethods',
-            'posing'
-        }
-    }
+    'lschema.unchangeable.Unchangeable'
 };
 
 
