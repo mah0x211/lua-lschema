@@ -35,11 +35,11 @@ local AUX = halo.class.AUX;
 --[[
     MARK: Metatable
 --]]
-function AUX:__newindex( prop )
+function AUX.__newindex( self, prop )
     error( ('attempted to assign to readonly property: %q'):format( prop ), 2 );
 end
 
-function AUX:__index( prop )
+function AUX.__index( self, prop )
     error( ('attempted to access to undefined value: %q'):format( prop ), 2 );
 end
 
