@@ -21,6 +21,7 @@ build = {
     type = "builtin",
     modules = {
         lschema = "lschema.lua",
+        ['lschema.unchangeable'] = "lib/unchangeable.lua",
         ['lschema.aux'] = "lib/aux.lua",
         ['lschema.container'] = "lib/container.lua",
         ['lschema.ddl'] = "lib/ddl.lua",
