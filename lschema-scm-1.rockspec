@@ -24,7 +24,6 @@ build = {
         ['lschema.unchangeable'] = "lib/unchangeable.lua",
         ['lschema.aux'] = "lib/aux.lua",
         ['lschema.container'] = "lib/container.lua",
-        ['lschema.ddl'] = "lib/ddl.lua",
         ['lschema.ddl.errno'] = "lib/ddl/errno.lua",
         ['lschema.ddl.template'] = "lib/ddl/template.lua",
         ['lschema.ddl.enum'] = "lib/ddl/enum.lua",

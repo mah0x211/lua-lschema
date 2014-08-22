@@ -26,10 +26,10 @@
   Created by Masatoshi Teruya on 14/06/08.
   
 --]]
-local halo = require('halo');
-local typeof = require('util.typeof');
 local AUX = require('lschema.aux');
-local DDL = require('lschema.ddl');
+local Container = require('lschema.container');
+local ISA = require('lschema.ddl.isa');
+local halo = require('halo');
 local Schema = halo.class.Schema;
 
 Schema.inherits {
@@ -50,12 +50,19 @@ Schema:property {
 --[[
     MARK: Metatable
 --]]
+local function createISA( ... )
+    return ISA.new( ... )
+end
+
 function Schema:init( name )
     local index = AUX.getIndex( self );
     
     AUX.isValidIdent( self, name );
     self.name = name;
-    rawset( index, 'ddl', DDL.new() );
+    rawset( index, 'isa', createISA );
+    rawset( index, 'enum', Container.new('lschema.ddl.enum') );
+    rawset( index, 'struct', Container.new('lschema.ddl.struct') );
+    rawset( index, 'pattern', Container.new('lschema.ddl.pattern') );
     
     return self;
 end
