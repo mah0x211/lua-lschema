@@ -184,16 +184,16 @@ function VERIFIER:proc( val, typeconv )
 #STRUCT
     end
     
-<?if $.notNull ?>
+<?if $.default ~= nil ?>
+    -- default
+    return <?$put $.default ?>;
+<?elseif $.notNull ?>
     -- not null
     return nil, { 
         errno = <?put errno.ENULL ?>, 
         etype = 'ENULL',
         attr = ATTR
     };
-<?elseif $.default ?>
-    -- default
-    return <?$put $.default ?>;
 <?else?>
     return val;
 <?end?>
