@@ -107,6 +107,8 @@ local function toboolean( arg )
         elseif arg == 'false' then
             return false;
         end
+    elseif t == 'number' then
+        return typeof.finite( arg ) and arg ~= 0;
     end
 end
 
