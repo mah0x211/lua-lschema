@@ -109,6 +109,8 @@ local function getAttrs( fields )
             attr[k] = v['.attr'];
         elseif typeof.table( v ) then
             attr[k] = v['.attr'] or v;
+        elseif k == 'default' then
+            attr[k] = v;
         elseif typeof.boolean( v ) then
             if v then
                 attr[k] = v;
