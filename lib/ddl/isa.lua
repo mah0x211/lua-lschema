@@ -158,7 +158,7 @@ function ISA:of( val )
     -- check instanceof
     AUX.abort( 
         not halo.instanceof( val, class ), 
-        'value must be instance of %q class', isa
+        'value must be instance of %q class', self.isa
     );
     
     rawset( index, self.isa, val );
