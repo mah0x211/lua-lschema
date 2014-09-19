@@ -42,7 +42,7 @@ Struct.inherits {
 function Struct:init( tbl )
     local ISA = require('lschema.ddl.isa');
     local index = AUX.getIndex( self );
-    local id, isa, hasFields, fn;
+    local hasFields, fn;
     
     AUX.abort( 
         not typeof.table( tbl ), 

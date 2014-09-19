@@ -48,7 +48,7 @@ end
 --]]
 local function getUserStackIndex()
     local list = util.string.split( debug.traceback(), '\n' );
-    local idx, line;
+    local line;
     
     for idx = 2, #list do
         line = list[idx];
@@ -101,7 +101,6 @@ end
 
 local function getAttrs( fields )
     local attr = {};
-    local k,v;
 
     -- create attribute table
     for k,v in pairs( fields ) do
@@ -127,7 +126,6 @@ end
 local function discardMethods( obj )
     local index = getIndex( obj );
     local fields = {};
-    local k,v;
     
     for k,v in pairs( index ) do
         if k ~= 'constructor' then

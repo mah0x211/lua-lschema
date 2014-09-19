@@ -43,7 +43,7 @@ Enum.inherits {
 --]]
 function Enum:init( tbl )
     local index = AUX.getIndex( self );
-    local id, val, fn;
+    local fn;
     
     AUX.abort( 
         not typeof.table( tbl ), 

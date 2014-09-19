@@ -118,7 +118,7 @@ end
 -- @param   isa string | number | unsigned | int | uint | boolean | enum | struct
 function ISA:init( isa )
     local index = AUX.getIndex( self );
-    local asArray, methods, i, method;
+    local asArray, methods;
 
     AUX.abort( 
         not typeof.string( isa ), 
@@ -141,7 +141,7 @@ function ISA:init( isa )
     rawset( index, 'isa', isa );
     rawset( index, 'asArray', asArray ~= nil );
     -- remove unused methods
-    for i, method in ipairs( methods ) do
+    for _, method in ipairs( methods ) do
         if method ~= 'len' or not asArray then
             rawset( index, method, nil );
         end

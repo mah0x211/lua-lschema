@@ -26,7 +26,7 @@
   Created by Masatoshi Teruya on 14/06/27.
 
 --]]
-local halo = require('halo');
+
 local eval = require('util').eval;
 local inspect = require('util').inspect;
 local keys = require('util.table').keys;
