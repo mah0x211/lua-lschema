@@ -227,7 +227,7 @@ end
 function VERIFIER:proc( arr, typeconv )
     if arr ~= nil then
         local errtbl = {};
-        local len, idx, val, res, err, gotError;
+        local len, val, res, err, gotError;
         
         if type( arr ) ~= 'table' then
             return nil, { 
@@ -250,13 +250,13 @@ function VERIFIER:proc( arr, typeconv )
         end
 <?end?>
         for idx = 1, len do
-            val = rawget( arr, idx );
+            val = arr[idx];
             res, err = checkVal( val, typeconv );
             if err then
-                rawset( errtbl, idx, err );
+                errtbl[idx] = err;
                 gotError = true;
             elseif val ~= res then
-                rawset( arr, idx, res );
+                arr[idx] = res;
             end
         end
         
@@ -311,13 +311,13 @@ local VERIFIER = {};
 function VERIFIER:proc( tbl, typeconv )
     if type( tbl ) == 'table' then
         local errtbl = {};
-        local idx, field, val, err, gotError;
+        local field, val, err, gotError;
         
         for idx = 1, NFIELDS do
-            field = rawget( FIELDS, idx );
+            field = FIELDS[idx];
             val, err = self[field]( tbl[field], typeconv );
             if err then
-                rawset( errtbl, field, err );
+                errtbl[field] = err;
                 gotError = true;
             else
                 tbl[field] = val;
@@ -337,9 +337,7 @@ end
 return VERIFIER.proc;
 ]];
 local STRUCT_ENV = {
-    type = type,
-    rawget = rawget,
-    rawset = rawset
+    type = type
 };
 
 
