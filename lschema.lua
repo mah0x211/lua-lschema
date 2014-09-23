@@ -67,14 +67,6 @@ function Schema:init( name )
     return self;
 end
 
-function Schema:dml()
-
-end
-
-function Schema:dcl()
-
-end
-
 
 return Schema.exports;
 
