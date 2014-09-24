@@ -68,7 +68,7 @@ end
 
 local function abort( exp, fmt, ... )
     if exp then
-        local tbl = util.table.map( map2string, {...} );
+        local tbl = util.table.map( {...}, map2string );
         error( string.format( fmt, unpack( tbl ) ), getUserStackIndex() );
     end
 end
