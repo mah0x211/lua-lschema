@@ -62,9 +62,14 @@ local function getUserStackIndex()
     return nil;
 end
 
+local function map2string( v )
+    return tostring( v );
+end
+
 local function abort( exp, fmt, ... )
     if exp then
-        error( string.format( fmt, ... ), getUserStackIndex() );
+        local tbl = util.table.map( map2string, {...} );
+        error( string.format( fmt, unpack( tbl ) ), getUserStackIndex() );
     end
 end
 
