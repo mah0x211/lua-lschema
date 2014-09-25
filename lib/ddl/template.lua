@@ -66,7 +66,6 @@ local tonumber = tonumber;
 local toboolean = toboolean;
 local type = type;
 local typeof = typeof;
-local ATTR = <?put $.attr ?>;
 <?if $.struct ?>local struct = struct;<?end?>
 <?if $.pattern ?>local pattern = pattern;<?end?>
 <?if $.enum ?>local enum = enum;<?end?>
@@ -83,7 +82,7 @@ local VERIFIER = {};
             return nil, {
                 errno = <?put errno.EMIN ?>, 
                 etype = 'EMIN',
-                attr = ATTR
+                attr = <?put $.attr ?>
             };
         end
 <?else?>
@@ -92,7 +91,7 @@ local VERIFIER = {};
             return nil, { 
                 errno = <?put errno.EMIN ?>, 
                 etype = 'EMIN',
-                attr = ATTR
+                attr = <?put $.attr ?>
             };
         end
 <?end?>
@@ -101,7 +100,7 @@ local VERIFIER = {};
             return nil, { 
                 errno = <?put errno.EMAX ?>,
                 etype = 'EMAX',
-                attr = ATTR
+                attr = <?put $.attr ?>
             };
         end
 <?end?>
@@ -116,7 +115,7 @@ local VERIFIER = {};
             return nil, {
                 errno = <?put errno.EPAT ?>, 
                 etype = 'EPAT',
-                attr = ATTR
+                attr = <?put $.attr ?>
             };
         end
 <?end?>
@@ -129,7 +128,7 @@ local VERIFIER = {};
             return nil, { 
                 errno = <?put errno.EENUM ?>,
                 etype = 'EENUM',
-                attr = ATTR
+                attr = <?put $.attr ?>
             };
         end
 <?end?>
@@ -174,7 +173,7 @@ function VERIFIER:proc( val, typeconv )
             return nil, { 
                 errno = <?put errno.ETYPE ?>, 
                 etype = 'ETYPE',
-                attr = ATTR
+                attr = <?put $.attr ?>
             };
         end
 
@@ -192,7 +191,7 @@ function VERIFIER:proc( val, typeconv )
     return nil, { 
         errno = <?put errno.ENULL ?>, 
         etype = 'ENULL',
-        attr = ATTR
+        attr = <?put $.attr ?>
     };
 <?else?>
     return val;
@@ -213,7 +212,7 @@ local function checkVal( val, typeconv )
         return nil, { 
             errno = <?put errno.ETYPE ?>,
             etype = 'ETYPE',
-            attr = ATTR
+            attr = <?put $.attr ?>
         };
     end
 
@@ -233,7 +232,7 @@ function VERIFIER:proc( arr, typeconv )
             return nil, { 
                 errno = <?put errno.ETYPE ?>,
                 etype = 'ETYPE',
-                attr = ATTR
+                attr = <?put $.attr ?>
             };
         end
         
@@ -245,7 +244,7 @@ function VERIFIER:proc( arr, typeconv )
             return nil, { 
                 errno = <?put errno.ELEN ?>,
                 etype = 'ELEN',
-                attr = ATTR
+                attr = <?put $.attr ?>
             };
         end
 <?end?>
@@ -268,7 +267,7 @@ function VERIFIER:proc( arr, typeconv )
     return nil, { 
         errno = <?put errno.ENULL ?>,
         etype = 'ENULL',
-        attr = ATTR
+        attr = <?put $.attr ?>
     };
 <?else?>
     return arr;
@@ -282,7 +281,6 @@ return VERIFIER.proc;
 local ENUM = [[
 -- enum
 
-local ATTR = <?put $.attr ?>;
 local ENUM = <?put $.fields ?>;
 local VERIFIER = {};
 function VERIFIER:proc( val )
@@ -290,7 +288,7 @@ function VERIFIER:proc( val )
         return nil, {
             errno = <?put errno.EENUM ?>,
             etype = 'EENUM',
-            attr = ATTR
+            attr = <?put $.attr ?>
         };
     end
     
@@ -304,7 +302,6 @@ local ENUM_ENV = {};
 local STRUCT = [[
 -- struct
 
-local ATTR = <?put $.attr ?>;
 local FIELDS = <?put $.fields ?>
 local NFIELDS = #FIELDS;
 local VERIFIER = {};
@@ -330,7 +327,7 @@ function VERIFIER:proc( tbl, typeconv )
     return nil, { 
         errno = <?put errno.ETYPE ?>,
         etype = 'ETYPE',
-        attr = ATTR
+        attr = <?put $.attr ?>
     };
 end
 
