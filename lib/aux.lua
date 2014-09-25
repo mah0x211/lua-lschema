@@ -91,15 +91,15 @@ local function isValidIdent( obj, id )
     
     abort( 
         not typeof.Nil( rawget( index, id ) ), 
-        'identifier %q is reserved word', id 
+        'identifier %q is reserved word', tostring(id)
     );
     abort( 
         not typeof.string( id ), 
-        'identifier must be type of string: %q', id 
+        'identifier must be type of string: %q', tostring(id) 
     );
     abort( 
         not id:find( PAT_IDENT ), 
-        'identifier format must be %q : %q', PAT_IDENT, id 
+        'identifier format must be %q : %q', PAT_IDENT, tostring(id)
     );
 end
 
