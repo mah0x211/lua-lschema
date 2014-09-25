@@ -68,5 +68,20 @@ function Schema:init( name )
 end
 
 
+function Schema:lock()
+    local index = AUX.getIndex( self );
+    local container, containerIndex;
+    
+    rawset( index, 'isa', nil );
+    for _, k in ipairs({ 'enum', 'struct', 'pattern' }) do
+        container = rawget( index, k );
+        -- remove class
+        rawset( AUX.getIndex( container ), 'CLASS_OF', nil );
+        -- remove register function
+        rawset( getmetatable( container ), '__call', nil );
+    end
+end
+
+
 return Schema.exports;
 
