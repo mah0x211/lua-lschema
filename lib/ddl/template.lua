@@ -137,7 +137,7 @@ local VERIFIER = {};
     ['#STRUCT'] = [[
 <?if $.struct ?>
         -- struct
-        return struct( val, typeconv );
+        return struct( val, typeconv, trim );
 <?else?>
         return val;
 <?end?>
@@ -204,7 +204,7 @@ return VERIFIER.proc;
 local ISA_ARRAY = ([[
 #PREPARE
 
-local function checkVal( val, typeconv )
+local function checkVal( val, typeconv, trim )
 
 #TYPECONV
 
@@ -223,7 +223,7 @@ local function checkVal( val, typeconv )
 
 end
 
-function VERIFIER:proc( arr, typeconv )
+function VERIFIER:proc( arr, typeconv, trim )
     if arr ~= nil then
         local errtbl = {};
         local len, val, res, err, gotError;
@@ -250,7 +250,7 @@ function VERIFIER:proc( arr, typeconv )
 <?end?>
         for idx = 1, len do
             val = arr[idx];
-            res, err = checkVal( val, typeconv );
+            res, err = checkVal( val, typeconv, trim );
             if err then
                 errtbl[idx] = err;
                 gotError = true;
@@ -305,23 +305,24 @@ local STRUCT = [[
 local FIELDS = <?put $.fields ?>
 local NFIELDS = #FIELDS;
 local VERIFIER = {};
-function VERIFIER:proc( tbl, typeconv )
+function VERIFIER:proc( tbl, typeconv, trim )
     if type( tbl ) == 'table' then
+        local result = trim == true and {} or tbl;
         local errtbl = {};
         local field, val, err, gotError;
         
         for idx = 1, NFIELDS do
             field = FIELDS[idx];
-            val, err = self[field]( tbl[field], typeconv );
+            val, err = self[field]( tbl[field], typeconv, trim );
             if err then
                 errtbl[field] = err;
                 gotError = true;
             else
-                tbl[field] = val;
+                result[field] = val;
             end
         end
         
-        return tbl, gotError and errtbl or nil;
+        return result, gotError and errtbl or nil;
     end
     
     return nil, { 
