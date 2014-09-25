@@ -137,7 +137,7 @@ local VERIFIER = {};
     ['#STRUCT'] = [[
 <?if $.struct ?>
         -- struct
-        return struct( val, typeconv, trim );
+        return struct( val, typeconv, trim, setter );
 <?else?>
         return val;
 <?end?>
@@ -204,7 +204,7 @@ return VERIFIER.proc;
 local ISA_ARRAY = ([[
 #PREPARE
 
-local function checkVal( val, typeconv, trim )
+local function checkVal( val, typeconv, trim, setter )
 
 #TYPECONV
 
@@ -223,7 +223,7 @@ local function checkVal( val, typeconv, trim )
 
 end
 
-function VERIFIER:proc( arr, typeconv, trim )
+function VERIFIER:proc( arr, typeconv, trim, setter )
     if arr ~= nil then
         local errtbl = {};
         local len, val, res, err, gotError;
@@ -250,7 +250,7 @@ function VERIFIER:proc( arr, typeconv, trim )
 <?end?>
         for idx = 1, len do
             val = arr[idx];
-            res, err = checkVal( val, typeconv, trim );
+            res, err = checkVal( val, typeconv, trim, setter );
             if err then
                 errtbl[idx] = err;
                 gotError = true;
@@ -305,20 +305,26 @@ local STRUCT = [[
 local FIELDS = <?put $.fields ?>
 local NFIELDS = #FIELDS;
 local VERIFIER = {};
-function VERIFIER:proc( tbl, typeconv, trim )
+
+local function defaultSetter( result, k, v )
+    result[k] = v;
+end
+
+function VERIFIER:proc( tbl, typeconv, trim, setter )
     if type( tbl ) == 'table' then
         local result = trim == true and {} or tbl;
         local errtbl = {};
         local field, val, err, gotError;
         
+        setter = type(setter) == 'function' and setter or defaultSetter;
         for idx = 1, NFIELDS do
             field = FIELDS[idx];
-            val, err = self[field]( tbl[field], typeconv, trim );
+            val, err = self[field]( tbl[field], typeconv, trim, setter );
             if err then
                 errtbl[field] = err;
                 gotError = true;
             else
-                result[field] = val;
+                setter( result, field, val, self );
             end
         end
         
