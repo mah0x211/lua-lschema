@@ -248,18 +248,21 @@ function VERIFIER:proc( arr, typeconv, trim, setter )
             };
         end
 <?end?>
+
+        local result = trim == true and {} or arr;
+
         for idx = 1, len do
             val = arr[idx];
             res, err = checkVal( val, typeconv, trim, setter );
             if err then
                 errtbl[idx] = err;
                 gotError = true;
-            elseif val ~= res then
-                arr[idx] = res;
+            elseif trim == true or val ~= res then
+                result[idx] = res;
             end
         end
         
-        return arr, gotError and errtbl or nil;
+        return result, gotError and errtbl or nil;
     end
     
 <?if $.notNull ?>
