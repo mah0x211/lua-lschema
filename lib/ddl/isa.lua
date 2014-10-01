@@ -193,7 +193,7 @@ function ISA:len( min, max )
     return self;
 end
 
---- not null
+--- not null(empty array will be interpreted as a null)
 function ISA:notNull( ... )
     local index = AUX.getIndex( self );
     

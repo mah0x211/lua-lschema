@@ -137,7 +137,7 @@ local VERIFIER = {};
     ['#STRUCT'] = [[
 <?if $.struct ?>
         -- struct
-        return struct( val, typeconv, trim, setter );
+        return struct( val, typeconv, trim, split, _ctx, _parent, _field, _idx );
 <?else?>
         return val;
 <?end?>
@@ -161,7 +161,7 @@ local VERIFIER = {};
 
 local ISA = ([[
 #PREPARE
-function VERIFIER:proc( val, typeconv, trim, setter )
+function VERIFIER:proc( val, typeconv, trim, split, _ctx, _parent, _field, _idx )
     if val ~= nil then
 <?if $.min or $.max ?>
         local len;
@@ -204,7 +204,7 @@ return VERIFIER.proc;
 local ISA_ARRAY = ([[
 #PREPARE
 
-local function checkVal( val, typeconv, trim, setter )
+local function checkVal( val, typeconv, trim, split, _ctx, _parent, _field, _idx )
 
 #TYPECONV
 
@@ -223,7 +223,7 @@ local function checkVal( val, typeconv, trim, setter )
 
 end
 
-function VERIFIER:proc( arr, typeconv, trim, setter )
+function VERIFIER:proc( arr, typeconv, trim, split, _ctx, _parent, _field, _idx )
     if arr ~= nil then
         local errtbl = {};
         local len, val, res, err, gotError;
@@ -237,6 +237,7 @@ function VERIFIER:proc( arr, typeconv, trim, setter )
         end
         
         len = #arr;
+        
 <?if $.len ?>
         -- length 
         if len < <?put $.len.min ?> <?if $.len.max 
@@ -254,7 +255,7 @@ function VERIFIER:proc( arr, typeconv, trim, setter )
 
             for idx = 1, len do
                 val = arr[idx];
-                res, err = checkVal( val, typeconv, trim, setter );
+                res, err = checkVal( val, typeconv, trim, split, _ctx, _parent, _field, idx );
                 if err then
                     errtbl[idx] = err;
                     gotError = true;
@@ -312,29 +313,42 @@ local FIELDS = <?put $.fields ?>
 local NFIELDS = #FIELDS;
 local VERIFIER = {};
 
-local function defaultSetter( result, k, v )
-    result[k] = v;
-end
-
-function VERIFIER:proc( tbl, typeconv, trim, setter )
+function VERIFIER:proc( tbl, typeconv, trim, split, _ctx, _parent, _field, _idx )
     if type( tbl ) == 'table' then
         local result = trim == true and {} or tbl;
         local errtbl = {};
         local field, val, err, gotError;
+
+        if split and not _ctx then
+            _ctx = {};
+        end
         
-        setter = type(setter) == 'function' and setter or defaultSetter;
         for idx = 1, NFIELDS do
             field = FIELDS[idx];
-            val, err = self[field]( tbl[field], typeconv, trim, setter );
+            val, err = self[field]( tbl[field], typeconv, trim, split, _ctx, result, field );
             if err then
                 errtbl[field] = err;
+                result[field] = tbl[field];
                 gotError = true;
             else
-                setter( result, field, val, self );
+                result[field] = val;
             end
         end
         
-        return result, gotError and errtbl or nil;
+        if gotError then
+            return result, errtbl;
+        elseif not split then
+            return result;
+        end
+        
+        _ctx[#_ctx+1] = {
+            parent = _parent,
+            field = _field,
+            idx = _idx,
+            value = result
+        };
+        
+        return _parent and result or _ctx;
     end
     
     return nil, { 
