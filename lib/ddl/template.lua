@@ -249,22 +249,25 @@ function VERIFIER:proc( arr, typeconv, trim, setter )
         end
 <?end?>
 
-        local result = trim == true and {} or arr;
+        if len > 0 then
+            local result = trim == true and {} or arr;
 
-        for idx = 1, len do
-            val = arr[idx];
-            res, err = checkVal( val, typeconv, trim, setter );
-            if err then
-                errtbl[idx] = err;
-                gotError = true;
-            elseif trim == true or val ~= res then
-                result[idx] = res;
+            for idx = 1, len do
+                val = arr[idx];
+                res, err = checkVal( val, typeconv, trim, setter );
+                if err then
+                    errtbl[idx] = err;
+                    gotError = true;
+                elseif trim == true or val ~= res then
+                    result[idx] = res;
+                end
             end
+            
+            return result, gotError and errtbl or nil;
         end
-        
-        return result, gotError and errtbl or nil;
     end
     
+-- empty array will be interpreted as a null
 <?if $.notNull ?>
     -- not null
     return nil, { 
@@ -273,7 +276,7 @@ function VERIFIER:proc( arr, typeconv, trim, setter )
         attr = <?put $.attr ?>
     };
 <?else?>
-    return arr;
+    return trim == true and {} or arr;
 <?end?>
 end
 
