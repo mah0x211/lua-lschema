@@ -161,7 +161,7 @@ local VERIFIER = {};
 
 local ISA = ([[
 #PREPARE
-function VERIFIER:proc( val, typeconv, trim )
+function VERIFIER:proc( val, typeconv, trim, setter )
     if val ~= nil then
 <?if $.min or $.max ?>
         local len;
