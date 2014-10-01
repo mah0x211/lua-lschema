@@ -39,7 +39,7 @@ Struct.inherits {
 --[[
     MARK: Method
 --]]
-function Struct:init( tbl )
+function Struct:init( name, tbl )
     local ISA = require('lschema.ddl.isa');
     local index = AUX.getIndex( self );
     local hasFields, fn;
@@ -73,7 +73,7 @@ function Struct:init( tbl )
     );
     
     -- make check function
-    fn = Template.renderStruct( AUX.discardMethods( self ), index['@'].attr );
+    fn = Template.renderStruct( AUX.discardMethods( self ), name, index['@'].attr );
     -- set generated function to __call metamethod
     AUX.setCallMethod( self, fn );
     

@@ -41,7 +41,7 @@ Enum.inherits {
 --[[
     MARK: Metatable
 --]]
-function Enum:init( tbl )
+function Enum:init( _, tbl )
     local index = AUX.getIndex( self );
     local fn;
     

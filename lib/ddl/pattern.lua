@@ -85,7 +85,7 @@ end
 --[[
     MARK: Method
 --]]
-function Pattern:init( tbl )
+function Pattern:init( _, tbl )
     local index;
     
     AUX.abort( 

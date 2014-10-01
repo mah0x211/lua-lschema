@@ -307,7 +307,7 @@ return VERIFIER.proc;
 local ENUM_ENV = {};
 
 local STRUCT = [[
--- struct
+-- struct: <?put $.name ?>
 
 local FIELDS = <?put $.fields ?>
 local NFIELDS = #FIELDS;
@@ -339,14 +339,20 @@ function VERIFIER:proc( tbl, typeconv, trim, split, _ctx, _parent, _field, _idx 
             return result, errtbl;
         elseif not split then
             return result;
+        elseif _parent then
+            _ctx[#_ctx+1] = {
+                struct = <?put $.name ?>,
+                parent = _parent,
+                field = _field,
+                idx = _idx,
+                data = result,
+                attr = <?put $.splitAttr ?>
+            };
+        else
+            _ctx[#_ctx+1] = {
+                data = result
+            };
         end
-        
-        _ctx[#_ctx+1] = {
-            parent = _parent,
-            field = _field,
-            idx = _idx,
-            value = result
-        };
         
         return _parent and result or _ctx;
     end
@@ -408,11 +414,32 @@ local function renderEnum( fields, attr )
     }, ENUM_ENV );
 end
 
-local function renderStruct( fields, attr )
+
+local SPLIT_ATTRS = {
+    isa = true,
+    unique = true
+};
+local function renderStruct( fields, name, attr )
+    local splitAttr = {};
+    local tbl;
+    
+    -- remove redundant fields
+    for k, v in pairs( attr ) do
+        tbl = {};
+        splitAttr[k] = tbl;
+        for ck, cv in pairs( v ) do
+            if SPLIT_ATTRS[ck] then
+                tbl[ck] = cv;
+            end
+        end
+    end
+    
     fields = keys( fields );
     return render( 'STRUCT', {
+        name = ('%q'):format( name ),
         fields = inspect( fields ),
-        attr = inspect( attr )
+        attr = inspect( attr ),
+        splitAttr = inspect( splitAttr )
     }, STRUCT_ENV );
 end
 

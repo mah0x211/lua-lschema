@@ -46,7 +46,7 @@ function Container:__call( name )
     AUX.isValidIdent( self, name );
     return function( ... )
         local index = AUX.getIndex( self );
-        local instance = rawget( index, CLASS_OF ).new( ... );
+        local instance = rawget( index, CLASS_OF ).new( name, ... );
         
         instance['@'].name = name;
         rawset( index, name, instance );
