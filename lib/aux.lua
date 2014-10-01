@@ -110,9 +110,9 @@ local function getAttrs( fields )
     -- create attribute table
     for k,v in pairs( fields ) do
         if k == 'pattern' then
-            attr[k] = v['.attr'];
+            attr[k] = v['@'].attr;
         elseif typeof.table( v ) then
-            attr[k] = v['.attr'] or v;
+            attr[k] = v['@'] and v['@'].attr or v;
         elseif k == 'default' then
             attr[k] = v;
         elseif typeof.boolean( v ) then
@@ -131,6 +131,7 @@ end
 local function discardMethods( obj )
     local index = getIndex( obj );
     local fields = {};
+    local attr = {};
     
     for k,v in pairs( index ) do
         if k ~= 'constructor' then
@@ -142,7 +143,8 @@ local function discardMethods( obj )
         end
     end
     
-    rawset( index, '.attr', getAttrs( fields ) );
+    attr.attr = getAttrs( fields );
+    rawset( index, '@', attr );
     
     return fields;
 end

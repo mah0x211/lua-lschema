@@ -99,9 +99,11 @@ function Pattern:init( tbl )
     
     self = AUX.posing( lrex.new( unpack( tbl ) ), self );
     index = AUX.getIndex( self );
-    rawset( index, '.attr', {
-        regex = tbl[1],
-        opts = select( 2, tbl )
+    rawset( index, '@', {
+        attr = {
+            regex = tbl[1],
+            opts = select( 2, tbl )
+        }
     });
     
     return self;

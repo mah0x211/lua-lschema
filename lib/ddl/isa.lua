@@ -272,7 +272,7 @@ function ISA:pattern( val )
         AUX.abort(
              not val:exec( self.default ),
             'pattern %q does not match to default value %q',
-            val['.name'], self.default
+            val['@'].name, self.default
         );
     end
     
@@ -299,14 +299,14 @@ function ISA:default( val )
         AUX.abort( 
             not self.enum( val ), 
             'default value %q is not defined at enum %q',
-            val, self.enum['.name']
+            val, self.enum['@'].name
         );
     elseif self.isa == 'string' and
            halo.instanceof( self.pattern, Pattern ) then
         AUX.abort(
             not self.pattern:exec( val ),
             'default value %q does not match pattern %q',
-            val, self.pattern['.name']
+            val, self.pattern['@'].name
         );
     end
     rawset( index, 'default', val );
@@ -336,7 +336,7 @@ function ISA:makeCheck()
         enum = rawget( fields, 'enum' ),
         struct = rawget( fields, 'struct' )
     };
-    fields.attr = util.inspect( index['.attr'] );
+    fields.attr = util.inspect( index['@'].attr );
     -- make check function
     fn = Template.renderISA( fields, env );
     -- set generated function to __call metamethod

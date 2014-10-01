@@ -48,7 +48,7 @@ function Container:__call( name )
         local index = AUX.getIndex( self );
         local instance = rawget( index, CLASS_OF ).new( ... );
         
-        rawset( AUX.getIndex( instance ), '.name', name );
+        instance['@'].name = name;
         rawset( index, name, instance );
     end
 end

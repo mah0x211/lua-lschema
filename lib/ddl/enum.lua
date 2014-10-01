@@ -67,7 +67,7 @@ function Enum:init( tbl )
     end
     
     -- make check function
-    fn = Template.renderEnum( AUX.discardMethods( self ), index['.attr'] );
+    fn = Template.renderEnum( AUX.discardMethods( self ), index['@'].attr );
     -- set generated function to __call metamethod
     AUX.setCallMethod( self, fn );
     
