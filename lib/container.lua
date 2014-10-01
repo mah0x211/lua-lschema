@@ -54,8 +54,11 @@ function Container:__call( name )
 end
 
 function Container:init( class )
-    rawset( AUX.getIndex( self ), CLASS_OF, require( class ) );
-    
+    local index = AUX.getIndex( self );
+    rawset( index, CLASS_OF, require( class ) );
+    -- remove init method
+    rawset( index, 'init', nil );
+
     return self;
 end
 

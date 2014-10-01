@@ -63,6 +63,8 @@ function Schema:init( name )
     rawset( index, 'enum', Container.new('lschema.ddl.enum') );
     rawset( index, 'struct', Container.new('lschema.ddl.struct') );
     rawset( index, 'pattern', Container.new('lschema.ddl.pattern') );
+    -- remove init method
+    rawset( index, 'init', nil );
     
     return self;
 end
@@ -80,6 +82,8 @@ function Schema:lock()
         -- remove register function
         rawset( getmetatable( container ), '__call', nil );
     end
+    -- remove lock method
+    rawset( index, 'lock', nil );
 end
 
 
