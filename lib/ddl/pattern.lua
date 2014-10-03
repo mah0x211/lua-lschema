@@ -29,10 +29,12 @@
 
 local halo = require('halo');
 local typeof = require('util.typeof');
-local lrex = require('rex_pcre');
+local lrex = require('rex_onig');
 local unpack = unpack or table.unpack;
 local AUX = require('lschema.aux');
 local Pattern = halo.class.Pattern;
+
+lrex.setdefaultsyntax('PERL');
 
 Pattern.inherits {
     'lschema.unchangeable.Unchangeable'
