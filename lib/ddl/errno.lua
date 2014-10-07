@@ -34,6 +34,7 @@ return {
     EMAX        = 4,
     EPAT        = 5,
     EENUM       = 6,
-    ELEN        = 7
+    ELEN        = 7,
+    EDUP        = 8
 };
 

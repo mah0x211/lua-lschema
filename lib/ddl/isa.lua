@@ -62,19 +62,24 @@ of      |        |        |          |     |      |         |  y     |   y    |
 --------------------------------------------------------------------------------------
 len     |   y    |   y    |    y     |  y  |  y   |    y    |  y     |   y    |
 --------------------------------------------------------------------------------------
-distinct|   y    |   y    |    y     |  y  |  y   |    y    |  y     |        |
+noDup   |   y    |   y    |    y     |  y  |  y   |    y    |  y     |        |
 ------------------------------------------------------------------------------------]]
 
 local ISA_TYPE = {
-    ['string']      = { 'of', 'len' },
-    ['number']      = { 'of', 'len', 'pattern' },
-    ['unsigned']    = { 'of', 'len', 'pattern' },
-    ['int']         = { 'of', 'len', 'pattern' },
-    ['uint']        = { 'of', 'len', 'pattern' },
-    ['boolean']     = { 'of', 'len', 'pattern', 'min', 'max' },
-    ['table']       = { 'of', 'len', 'pattern', 'min', 'max', 'unique' },
-    ['enum']        = {       'len', 'pattern', 'min', 'max' },
-    ['struct']      = {       'len', 'pattern', 'min', 'max', 'default' }
+    ['string']      = { 'of', 'len', 'noDup' },
+    ['number']      = { 'of', 'len', 'noDup', 'pattern' },
+    ['unsigned']    = { 'of', 'len', 'noDup', 'pattern' },
+    ['int']         = { 'of', 'len', 'noDup', 'pattern' },
+    ['uint']        = { 'of', 'len', 'noDup', 'pattern' },
+    ['boolean']     = { 'of', 'len', 'noDup', 'pattern', 'min', 'max' },
+    ['table']       = { 'of', 'len', 'noDup', 'pattern', 'min', 'max', 'unique' },
+    ['enum']        = {       'len', 'noDup', 'pattern', 'min', 'max' },
+    ['struct']      = {       'len', 'noDup', 'pattern', 'min', 'max', 'default' }
+};
+
+local ISA_ARRAY_ATTR = {
+    ['len']     = true,
+    ['noDup']   = true
 };
 
 local ISA_AKA = {
@@ -144,7 +149,8 @@ function ISA:init( isa )
     rawset( index, 'asArray', asArray ~= nil );
     -- remove unused methods
     for _, method in ipairs( methods ) do
-        if method ~= 'len' or not asArray then
+        if not ISA_ARRAY_ATTR[method] or not asArray or 
+           isa == 'struct' and method == 'noDup' then
             rawset( index, method, nil );
         end
     end
@@ -194,6 +200,15 @@ function ISA:len( min, max )
     
     return self;
 end
+
+--- no duplicate
+function ISA:noDup( ... )
+    AUX.abort( #{...} > 0, 'should not pass argument' );
+    rawset( AUX.getIndex( self ), 'noDup', true );
+    
+    return self;
+end
+
 
 --- not null(empty array will be interpreted as a null)
 function ISA:notNull( ... )

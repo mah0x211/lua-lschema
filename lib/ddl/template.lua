@@ -256,16 +256,34 @@ function VERIFIER:proc( arr, typeconv, trim, split, _ctx, _parent, _field, _idx 
 
         if len > 0 then
             local result = trim == true and {} or arr;
-
+<?if $.noDup ?>
+            local dupIdx = {};
+            local dupVal;
+<?end?>
             for idx = 1, len do
                 val = arr[idx];
                 res, err = checkVal( val, typeconv, trim, split, _ctx, _parent, _field, idx );
+<?if $.noDup ?>
+                dupVal = tostring( res );
+<?end?>
                 if err then
                     errtbl[idx] = err;
                     gotError = true;
+<?if $.noDup ?>
+                elseif dupIdx[dupVal] then
+                    errtbl[idx] = {
+                        errno = <?put errno.EDUP ?>,
+                        etype = 'EDUP',
+                        attr = <?put $.attr ?>
+                    };
+                    gotError = true;
+<?end?>
                 elseif trim == true or val ~= res then
                     result[idx] = res;
                 end
+<?if $.noDup ?>
+                dupIdx[dupVal] = true;
+<?end?>
             end
             
             return result, gotError and errtbl or nil;
