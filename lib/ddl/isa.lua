@@ -39,31 +39,31 @@ ISA.inherits {
 };
 
 
---[[-------------------------------------------------------------------------
-        | string | number | unsigned | int | uint | boolean | enum   | struct
-=============================================================================
+--[[----------------------------------------------------------------------------------
+        | string | number | unsigned | int | uint | boolean | enum   | struct | table
+======================================================================================
 datatype| string | double            | integer    | boolean | string | table
-=============================================================================
-notNull |   y    |   y    |    y     |  y  |  y   |    y    |  y     |   y
------------------------------------------------------------------------------
-default |   y    |   y    |    y     |  y  |  y   |    y    |  y     |
------------------------------------------------------------------------------
-unique  |   y    |   y    |    y     |  y  |  y   |    y    |  y     |
------------------------------------------------------------------------------
-min     |   y    |   y    |    y     |  y  |  y   |         |        |
------------------------------------------------------------------------------
-max     |   y    |   y    |    y     |  y  |  y   |         |        |
------------------------------------------------------------------------------
-pattern |   y    |        |          |     |      |         |        |
------------------------------------------------------------------------------
-of      |        |        |          |     |      |         |  y     |   y
------------------------------------------------------------------------------
+======================================================================================
+notNull |   y    |   y    |    y     |  y  |  y   |    y    |  y     |   y    |   y
+--------------------------------------------------------------------------------------
+default |   y    |   y    |    y     |  y  |  y   |    y    |  y     |        |   y
+--------------------------------------------------------------------------------------
+unique  |   y    |   y    |    y     |  y  |  y   |    y    |  y     |        |
+--------------------------------------------------------------------------------------
+min     |   y    |   y    |    y     |  y  |  y   |         |        |        |
+--------------------------------------------------------------------------------------
+max     |   y    |   y    |    y     |  y  |  y   |         |        |        |
+--------------------------------------------------------------------------------------
+pattern |   y    |        |          |     |      |         |        |        |
+--------------------------------------------------------------------------------------
+of      |        |        |          |     |      |         |  y     |   y    |
+--------------------------------------------------------------------------------------
           array field []
------------------------------------------------------------------------------
-len     |   y    |   y    |    y     |  y  |  y   |    y    |  y     |   y
------------------------------------------------------------------------------
-distinct|   y    |   y    |    y     |  y  |  y   |    y    |  y     |
----------------------------------------------------------------------------]]
+--------------------------------------------------------------------------------------
+len     |   y    |   y    |    y     |  y  |  y   |    y    |  y     |   y    |
+--------------------------------------------------------------------------------------
+distinct|   y    |   y    |    y     |  y  |  y   |    y    |  y     |        |
+------------------------------------------------------------------------------------]]
 
 local ISA_TYPE = {
     ['string']      = { 'of', 'len' },
@@ -72,6 +72,7 @@ local ISA_TYPE = {
     ['int']         = { 'of', 'len', 'pattern' },
     ['uint']        = { 'of', 'len', 'pattern' },
     ['boolean']     = { 'of', 'len', 'pattern', 'min', 'max' },
+    ['table']       = { 'of', 'len', 'pattern', 'min', 'max', 'unique' },
     ['enum']        = {       'len', 'pattern', 'min', 'max' },
     ['struct']      = {       'len', 'pattern', 'min', 'max', 'default' }
 };
@@ -115,7 +116,7 @@ end
 
 --- initializer
 -- @param   ddl ddl
--- @param   isa string | number | unsigned | int | uint | boolean | enum | struct
+-- @param   isa string | number | unsigned | int | uint | boolean | table | enum | struct
 function ISA:init( isa )
     local index = AUX.getIndex( self );
     local asArray, methods;
@@ -130,11 +131,12 @@ function ISA:init( isa )
     if asArray == '' then
         asArray = nil;
     end
+    AUX.abort( isa == 'table' and asArray, 'table type does not support array' );
     
     methods = ISA_TYPE[isa];
     AUX.abort( 
         not methods or asArray and asArray ~= '[]', 
-        'data type must be typeof string | number | unsigned | int | uint | boolean | enum | struct'
+        'data type must be typeof string | number | unsigned | int | uint | boolean | table | enum | struct'
     );
     
     -- set isa
@@ -337,6 +339,10 @@ function ISA:makeCheck()
         struct = rawget( fields, 'struct' )
     };
     fields.attr = util.inspect( index['@'].attr );
+    if isa == 'table' then
+        fields.default = util.inspect( fields.default );
+    end
+    
     -- make check function
     fn = Template.renderISA( fields, env );
     -- set generated function to __call metamethod

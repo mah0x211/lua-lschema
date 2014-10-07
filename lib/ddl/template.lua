@@ -185,7 +185,11 @@ function VERIFIER:proc( val, typeconv, trim, split, _ctx, _parent, _field, _idx 
     
 <?if $.default ~= nil ?>
     -- default
-    return <?$put $.default ?>;
+    return <?if $.isa == 'table' 
+    ?><?put $.default 
+    ?><?else
+    ?><?$put $.default 
+    ?><?end?>;
 <?elseif $.notNull ?>
     -- not null
     return nil, { 
