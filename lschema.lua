@@ -72,7 +72,7 @@ end
 
 function Schema:lock()
     local index = AUX.getIndex( self );
-    local container, containerIndex;
+    local container;
     
     rawset( index, 'isa', nil );
     for _, k in ipairs({ 'enum', 'struct', 'pattern' }) do
