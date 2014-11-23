@@ -123,25 +123,29 @@ end
 -- @param   ddl ddl
 -- @param   isa string | number | unsigned | int | uint | boolean | table | enum | struct
 function ISA:init( isa )
+function ISA:init( typ )
     local index = AUX.getIndex( self );
     local asArray, methods;
 
     AUX.abort( 
-        not typeof.string( isa ), 
+        not typeof.string( typ ), 
         'argument must be type of string'
     );
     
     -- extract array symbol
-    isa, asArray = isa:match( '^(%a+)([^%a]*)$' );
-    if asArray == '' then
-        asArray = nil;
+    isa, asArray = typ:match( '^(%a+[%d]*)(.*)$' );
+    if asArray then
+        if asArray == '' then
+            asArray = nil;
+        else
+            AUX.abort( asArray ~= '[]', ('unknown data type %q'):format( typ ) );
+            AUX.abort( isa == 'table', 'table type does not support array' );
+        end
     end
-    AUX.abort( isa == 'table' and asArray, 'table type does not support array' );
-    
     methods = ISA_TYPE[isa];
     AUX.abort( 
-        not methods or asArray and asArray ~= '[]', 
-        'data type must be typeof string | number | unsigned | int | uint | boolean | table | enum | struct'
+        not methods, 
+        'data type must be typeof string | number | unsigned | int* | uint* | boolean | table | enum | struct'
     );
     
     -- set isa
