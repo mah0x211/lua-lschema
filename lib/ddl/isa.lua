@@ -70,7 +70,13 @@ local ISA_TYPE = {
     ['number']      = { 'of', 'len', 'noDup', 'pattern' },
     ['unsigned']    = { 'of', 'len', 'noDup', 'pattern' },
     ['int']         = { 'of', 'len', 'noDup', 'pattern' },
+    ['int8']        = { 'of', 'len', 'noDup', 'pattern' },
+    ['int16']       = { 'of', 'len', 'noDup', 'pattern' },
+    ['int32']       = { 'of', 'len', 'noDup', 'pattern' },
     ['uint']        = { 'of', 'len', 'noDup', 'pattern' },
+    ['uint8']       = { 'of', 'len', 'noDup', 'pattern' },
+    ['uint16']      = { 'of', 'len', 'noDup', 'pattern' },
+    ['uint32']      = { 'of', 'len', 'noDup', 'pattern' },
     ['boolean']     = { 'of', 'len', 'noDup', 'pattern', 'min', 'max' },
     ['table']       = { 'of', 'len', 'noDup', 'pattern', 'min', 'max', 'unique' },
     ['enum']        = {       'len', 'noDup', 'pattern', 'min', 'max' },
@@ -121,8 +127,7 @@ end
 
 --- initializer
 -- @param   ddl ddl
--- @param   isa string | number | unsigned | int | uint | boolean | table | enum | struct
-function ISA:init( isa )
+-- @param   isa string | number | unsigned | int* | uint* | boolean | table | enum | struct
 function ISA:init( typ )
     local index = AUX.getIndex( self );
     local asArray, methods;
@@ -138,7 +143,7 @@ function ISA:init( typ )
         if asArray == '' then
             asArray = nil;
         else
-            AUX.abort( asArray ~= '[]', ('unknown data type %q'):format( typ ) );
+            AUX.abort( asArray ~= '[]', 'unknown data type %q', typ );
             AUX.abort( isa == 'table', 'table type does not support array' );
         end
     end
