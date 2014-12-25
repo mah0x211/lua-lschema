@@ -26,8 +26,7 @@
   Created by Masatoshi Teruya on 14/08/22.
 
 --]]
-local halo = require('halo');
-local Unchangeable = halo.class.Unchangeable;
+local Unchangeable = require('halo').class.Unchangeable;
 
 
 --[[

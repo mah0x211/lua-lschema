@@ -27,11 +27,10 @@
 
 --]]
 
-local halo = require('halo');
 local typeof = require('util.typeof');
 local AUX = require('lschema.aux');
 local Template = require('lschema.ddl.template');
-local Enum = halo.class.Enum;
+local Enum = require('halo').class.Enum;
 
 Enum.inherits {
     'lschema.unchangeable.Unchangeable'

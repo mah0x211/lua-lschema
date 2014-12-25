@@ -28,20 +28,11 @@
 --]]
 local util = require('util');
 local typeof = util.typeof;
-local halo = require('halo');
-local AUX = halo.class.AUX;
+local AUX = require('halo').class.AUX;
 
-
---[[
-    MARK: Metatable
---]]
-function AUX.__newindex( self, prop )
-    error( ('attempted to assign to readonly property: %q'):format( prop ), 2 );
-end
-
-function AUX.__index( self, prop )
-    error( ('attempted to access to undefined value: %q'):format( prop ), 2 );
-end
+AUX.inherits {
+    'lschema.unchangeable.Unchangeable'
+};
 
 --[[
     MARK: Class Method

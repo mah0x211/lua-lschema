@@ -29,8 +29,7 @@
 local AUX = require('lschema.aux');
 local Container = require('lschema.container');
 local ISA = require('lschema.ddl.isa');
-local halo = require('halo');
-local Schema = halo.class.Schema;
+local Schema = require('halo').class.Schema;
 
 Schema.inherits {
     'lschema.unchangeable.Unchangeable'
