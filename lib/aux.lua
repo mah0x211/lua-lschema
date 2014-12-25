@@ -86,13 +86,7 @@ local function hasCallMethod( obj )
 end
 
 local PAT_IDENT     = '^[_a-zA-Z][_a-zA-Z0-9]*$';
-local function isValidIdent( obj, id )
-    local index = getIndex( obj );
-    
-    abort( 
-        not typeof.Nil( rawget( index, id ) ), 
-        'identifier %q is reserved word', tostring(id)
-    );
+local function isValidIdent( id )
     abort( 
         not typeof.string( id ), 
         'identifier must be type of string: %q', tostring(id) 

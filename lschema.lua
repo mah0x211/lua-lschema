@@ -57,7 +57,7 @@ end
 function Schema:init( name )
     local index = AUX.getIndex( self );
     
-    AUX.isValidIdent( self, name );
+    AUX.isValidIdent( name );
     self.name = name;
     rawset( index, 'isa', createISA );
     rawset( index, 'enum', Container.new('lschema.ddl.enum') );

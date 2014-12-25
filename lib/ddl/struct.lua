@@ -49,7 +49,7 @@ function Struct:init( name, tbl )
         'argument must be type of table'
     );
     for id, isa in pairs( tbl ) do
-        AUX.isValidIdent( self, id );
+        AUX.isValidIdent( id );
         AUX.abort( 
             rawget( index, id ), 
             'identifier %q already defined', id 

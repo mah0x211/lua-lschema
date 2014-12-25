@@ -54,7 +54,7 @@ function Enum:init( _, tbl )
         if typeof.number( id ) then
             id, val = val, id;
         end
-        AUX.isValidIdent( self, id );
+        AUX.isValidIdent( id );
         AUX.abort( 
             rawget( index, id ), 
             'idenifier %q already defined', id

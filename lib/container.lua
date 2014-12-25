@@ -27,9 +27,16 @@
 
 --]]
 
-local halo = require('halo');
+-- module
+local typeof = require('util.typeof');
 local AUX = require('lschema.aux');
-local Container = halo.class.Container;
+-- constants
+local RESERVED_IDENT = {
+    constructor = true,
+    CLASS_OF = true
+};
+-- class
+local Container = require('halo').class.Container;
 
 Container.inherits {
     'lschema.unchangeable.Unchangeable'
@@ -41,11 +48,18 @@ local CLASS_OF = 'CLASS_OF';
     MARK: Metatable
 --]]
 function Container:__call( name )
-    local self = self;
+    local index = AUX.getIndex( self );
     
-    AUX.isValidIdent( self, name );
+    AUX.isValidIdent( name );
+    AUX.abort( 
+        RESERVED_IDENT[name], 
+        'identifier %q is reserved word', tostring(name)
+    );
+    AUX.abort( 
+        not typeof.Nil( rawget( index, name ) ), 
+        'idenifier %q already defined', tostring(name)
+    );
     return function( ... )
-        local index = AUX.getIndex( self );
         local instance = rawget( index, CLASS_OF ).new( name, ... );
         
         instance['@'].name = name;
