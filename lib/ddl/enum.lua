@@ -42,7 +42,7 @@ Enum.inherits {
 --]]
 function Enum:init( _, tbl )
     local index = AUX.getIndex( self );
-    local fn;
+    local hasFields, fn;
     
     AUX.abort( 
         not typeof.table( tbl ), 
@@ -63,8 +63,14 @@ function Enum:init( _, tbl )
             'identifier %q value must be finite number: %q', id, val
         );
         rawset( index, id, val );
+        hasFields = true;
     end
     
+    AUX.abort( 
+        not hasFields,
+        'cannot create empty enum'
+    );
+
     -- make check function
     fn = Template.renderEnum( AUX.discardMethods( self ), index['@'].attr );
     -- set generated function to __call metamethod
