@@ -43,7 +43,13 @@ local ISA_TYPE_CONV = {
     ['number']      = 'tonumber',
     ['unsigned']    = 'tonumber',
     ['int']         = 'tonumber',
+    ['int8']        = 'tonumber',
+    ['int16']       = 'tonumber',
+    ['int32']       = 'tonumber',
     ['uint']        = 'tonumber',
+    ['uint8']       = 'tonumber',
+    ['uint16']      = 'tonumber',
+    ['uint32']      = 'tonumber',
     ['boolean']     = 'toboolean'
 };
 
