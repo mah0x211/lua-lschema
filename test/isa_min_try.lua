@@ -1,3 +1,4 @@
+local errno = require('lschema.ddl.errno');
 local lschema = require('lschema');
 local myschema = lschema.new('myschema');
 local isa, err, _;
@@ -65,7 +66,7 @@ for typ, val in pairs({
         else
             _, err = isa( val - 1 );
         end
-        ifNotEqual( err.errno, 3 );
+        ifNotEqual( err.errno, errno.EMIN );
         ifNotEqual( err.etype, 'EMIN' );
         
         -- array
@@ -93,7 +94,7 @@ for typ, val in pairs({
         else
             _, err = isa( {val - 1} );
         end
-        ifNotEqual( err[1].errno, 3 );
+        ifNotEqual( err[1].errno, errno.EMIN );
         ifNotEqual( err[1].etype, 'EMIN' );
     end
 end
