@@ -1,3 +1,4 @@
+local errno = require('lschema.ddl.errno');
 local lschema = require('lschema');
 local myschema = ifNil( lschema.new('myschema') );
 local enum = myschema.enum;
@@ -55,7 +56,7 @@ ifNotEqual( enum.myenum('name2'), 'name2' );
 -- verify error
 local res, err = enum.myenum('name3');
 local cmp = { 
-    errno = 6,
+    errno = errno.EENUM,
     etype = "EENUM",
     attr = { 
         name1 = 1,
