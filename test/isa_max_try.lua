@@ -1,7 +1,7 @@
 local errno = require('lschema.ddl.errno');
 local lschema = require('lschema');
 local myschema = lschema.new('myschema');
-local isa, err, _;
+local isa, err, len, _;
 
 -- set enum
 myschema.enum 'myenum' {
@@ -50,10 +50,15 @@ for typ, val in pairs({
         -- valid defintion
         ifNotTrue(isolate(function()
             if typ == 'string' then
-                isa = myschema.isa( typ ):max( #val );
+                len = #val;
             else
-                isa = myschema.isa( typ ):max( val );
+                len = val;
             end
+            isa = myschema.isa( typ ):max( len );
+            -- should not redefine
+            ifTrue(isolate(function()
+                isa:max( len );
+            end));
             isa:makeCheck();
         end));
         
@@ -78,10 +83,15 @@ for typ, val in pairs({
         -- valid difinition
         ifNotTrue(isolate(function()
             if typ == 'string' then
-                isa = myschema.isa( typ .. '[]' ):max( #val );
+                len = #val;
             else
-                isa = myschema.isa( typ .. '[]' ):max( val );
+                len = val;
             end
+            isa = myschema.isa( typ .. '[]' ):max( len );
+            -- should not redefine
+            ifTrue(isolate(function()
+                isa:max( len );
+            end));
             isa:makeCheck();
         end));
         
