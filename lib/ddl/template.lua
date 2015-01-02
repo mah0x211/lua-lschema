@@ -82,7 +82,7 @@ local VERIFIER = {};
     ['#MINMAX'] = [[
 <?if $.min or $.max ?>
         -- MINMAX
-        len = <?if TYPE_CONV[$.isa] == tostring ?>#<?end?>val;
+        len = <?if $.isa == 'string' ?>#<?end?>val;
 <?if $.min == $.max ?>
         if len ~= <?put $.min ?> then
             return nil, {
