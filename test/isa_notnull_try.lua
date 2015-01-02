@@ -51,6 +51,10 @@ for typ, val in pairs({
         else
             isa = myschema.isa( typ ):notNull();
         end
+        -- should not redefine
+        ifTrue(isolate(function()
+            isa:notNull();
+        end));
         isa:makeCheck();
     end));
     
@@ -84,6 +88,10 @@ for typ, val in pairs({
             else
                 isa = myschema.isa( typ .. '[]' ):notNull();
             end
+            -- should not redefine
+            ifTrue(isolate(function()
+                isa:notNull();
+            end));
             isa:makeCheck();
         end));
         
