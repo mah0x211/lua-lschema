@@ -27,8 +27,8 @@
 
 --]]
 local halo = require('halo');
-local util = require('util');
-local typeof = util.typeof;
+local inspect = require('util').inspect;
+local typeof = require('util').typeof;
 local AUX = require('lschema.aux');
 local Template = require('lschema.ddl.template');
 local Pattern = require('lschema.ddl.pattern');
@@ -362,9 +362,9 @@ function ISA:makeCheck()
         enum = rawget( fields, 'enum' ),
         struct = rawget( fields, 'struct' )
     };
-    fields.attr = util.inspect( index['@'].attr );
-    if isa == 'table' then
-        fields.default = util.inspect( fields.default );
+    fields.attr = inspect( index['@'].attr );
+    if isa == 'table' and fields.default then
+        fields.default = inspect( fields.default );
     end
     
     -- make check function
