@@ -33,11 +33,11 @@ local Unchangeable = require('halo').class.Unchangeable;
     MARK: Metatable
 --]]
 function Unchangeable:__newindex( prop )
-    error( ('attempted to assign to readonly property: %q'):format( prop ), 2 );
+    error( ('attempt to assign to a readonly property: %q'):format( prop ), 2 );
 end
 
 function Unchangeable:__index( prop )
-    error( ('attempted to access to undefined value: %q'):format( prop ), 2 );
+    error( ('attempt to access an undefined value: %q'):format( prop ), 2 );
 end
 
 return Unchangeable.exports;
