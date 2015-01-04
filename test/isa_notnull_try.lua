@@ -30,27 +30,21 @@ for typ, val in pairs({
     ['enum'] = 'name1',
     ['struct'] = { field = 'str' }
 }) do
+    isa = myschema.isa( typ );
+    if typ == 'enum' then
+        isa:of(myschema.enum.myenum);
+    elseif typ == 'struct' then
+        isa:of(myschema.struct.mystruct);
+    end
+    
     -- invalid definition: argument disallowed
     ifTrue(isolate(function()
-        if typ == 'enum' then
-            isa = myschema.isa( typ ):of(myschema.enum.myenum):notNull(1);
-        elseif typ == 'struct' then
-            isa = myschema.isa( typ ):of(myschema.struct.mystruct):notNull(1);
-        else
-            isa = myschema.isa( typ ):notNull(1);
-        end
-        isa:makeCheck();
+        isa:notNull(1);
     end));
     
     -- valid defintion
     ifNotTrue(isolate(function()
-        if typ == 'enum' then
-            isa = myschema.isa( typ ):of(myschema.enum.myenum):notNull();
-        elseif typ == 'struct' then
-            isa = myschema.isa( typ ):of(myschema.struct.mystruct):notNull();
-        else
-            isa = myschema.isa( typ ):notNull();
-        end
+        isa:notNull();
         -- should not redefine
         ifTrue(isolate(function()
             isa:notNull();
@@ -67,27 +61,26 @@ for typ, val in pairs({
     ifNotEqual( err.etype, 'ENULL' );
     
     -- array
-    if typ ~= 'table' then
+    -- does not support array
+    if typ == 'table' then
+        ifTrue(isolate(function()
+            isa = myschema.isa( typ .. '[]' );
+        end));
+    else
+        isa = myschema.isa( typ .. '[]' );
+        if typ == 'enum' then
+            isa:of(myschema.enum.myenum);
+        elseif typ == 'struct' then
+            isa:of(myschema.struct.mystruct);
+        end
+        
         -- invalid difinition: argument disallowed
         ifTrue(isolate(function()
-            if typ == 'enum' then
-                isa = myschema.isa( typ .. '[]' ):of(myschema.enum.myenum):notNull(1);
-            elseif typ == 'struct' then
-                isa = myschema.isa( typ .. '[]' ):of(myschema.struct.mystruct):notNull(1);
-            else
-                isa = myschema.isa( typ .. '[]' ):notNull(1);
-            end
-            isa:makeCheck();
+            isa:notNull(1);
         end));
         -- valid difinition
         ifNotTrue(isolate(function()
-            if typ == 'enum' then
-                isa = myschema.isa( typ .. '[]' ):of(myschema.enum.myenum):notNull();
-            elseif typ == 'struct' then
-                isa = myschema.isa( typ .. '[]' ):of(myschema.struct.mystruct):notNull();
-            else
-                isa = myschema.isa( typ .. '[]' ):notNull();
-            end
+            isa:notNull();
             -- should not redefine
             ifTrue(isolate(function()
                 isa:notNull();
