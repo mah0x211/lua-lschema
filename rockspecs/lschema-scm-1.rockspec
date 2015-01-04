@@ -11,10 +11,10 @@ description = {
 }
 dependencies = {
     "lua >= 5.1",
-    "lrexlib-oniguruma",
-    "util",
-    "halo",
-    "tsukuyomi"
+    "halo >= 1.1.0",
+    "lrexlib-oniguruma >= 2.7.2",
+    "tsukuyomi >= 1.0.0",
+    "util >= 1.3.0"
 }
 build = {
     type = "builtin",
