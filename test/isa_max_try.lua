@@ -38,24 +38,22 @@ for typ, val in pairs({
 }) do
     -- does not support max constraint
     if EXCEPTS[typ] then
+        isa = myschema.isa( typ );
         if typ == 'enum' then
-            isa = myschema.isa( typ ):of( myschema.enum.myenum );
+            isa:of( myschema.enum.myenum );
         elseif typ == 'struct' then
-            isa = myschema.isa( typ ):of( myschema.struct.mystruct );
-        else
-            isa = myschema.isa( typ );
+            isa:of( myschema.struct.mystruct );
         end
         
+        -- attempt to access an undefined value
         ifTrue(isolate(function()
-            isa:max();
-        end));
-        ifTrue(isolate(function()
-            isa:max( 1 );
+            local fn = isa.max;
         end));
     else
+        isa = myschema.isa( typ );
         -- invalid definition: no argument
         ifTrue(isolate(function()
-            isa = myschema.isa( typ ):max();
+            isa:max();
         end));
         
         -- valid defintion
@@ -65,7 +63,7 @@ for typ, val in pairs({
             else
                 len = val;
             end
-            isa = myschema.isa( typ ):max( len );
+            isa:max( len );
             -- should not redefine
             ifTrue(isolate(function()
                 isa:max( len );
@@ -94,21 +92,23 @@ for typ, val in pairs({
         end));
     -- does not support max constraint
     elseif EXCEPTS[typ] then
+        isa = myschema.isa( typ .. '[]' );
         if typ == 'enum' then
-            isa = myschema.isa( typ .. '[]' ):of( myschema.enum.myenum );
+            isa:of( myschema.enum.myenum );
         elseif typ == 'struct' then
-            isa = myschema.isa( typ .. '[]' ):of( myschema.struct.mystruct );
-        else
-            isa = myschema.isa( typ .. '[]' );
+            isa:of( myschema.struct.mystruct );
         end
-        -- invalid difinition
+        
+        -- attempt to access an undefined value
         ifTrue(isolate(function()
-            isa:max();
+            local fn = isa.max;
         end));
     else
+        isa = myschema.isa( typ .. '[]' );
+        
         -- invalid definition: no argument
         ifTrue(isolate(function()
-            isa = myschema.isa( typ .. '[]' ):max();
+            isa:max();
         end));
 
         -- valid difinition
@@ -118,7 +118,7 @@ for typ, val in pairs({
             else
                 len = val;
             end
-            isa = myschema.isa( typ .. '[]' ):max( len );
+            isa:max( len );
             -- should not redefine
             ifTrue(isolate(function()
                 isa:max( len );
