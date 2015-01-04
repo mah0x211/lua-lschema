@@ -26,8 +26,9 @@
   Created by Masatoshi Teruya on 14/06/25.
 
 --]]
-local util = require('util');
-local typeof = util.typeof;
+local typeof = require('util.typeof');
+local lastIndex = require('util.table').lastIndex;
+local split = require('util.string').split;
 local AUX = require('halo').class.AUX;
 
 AUX.inherits {
@@ -38,7 +39,7 @@ AUX.inherits {
     MARK: Class Method
 --]]
 local function getUserStackIndex()
-    local list = util.string.split( debug.traceback(), '\n' );
+    local list = split( debug.traceback(), '\n' );
     local line;
     
     for idx = 2, #list do
@@ -53,28 +54,39 @@ local function getUserStackIndex()
     return nil;
 end
 
-local function map2string( v )
-    return tostring( v );
-end
 
 local function abort( exp, fmt, ... )
     if exp then
-        local tbl = util.table.map( {...}, map2string );
-        error( string.format( fmt, unpack( tbl ) ), getUserStackIndex() );
+        local msg = fmt;
+        local args = {...};
+        local len = lastIndex( args );
+        
+        if len then
+            for i = 1, len do
+                args[i] = tostring( args[i] );
+            end
+            msg = msg:format( unpack( args ) );
+        end
+        
+        error( msg, getUserStackIndex() );
     end
 end
+
 
 local function getIndex( obj )
     return rawget( getmetatable( obj ), '__index' );
 end
 
+
 local function setCallMethod( obj, fn )
     rawset( getmetatable( obj ), '__call', fn );
 end
 
+
 local function hasCallMethod( obj )
     return type( rawget( getmetatable( obj ), '__call' ) ) == 'function';
 end
+
 
 local PAT_IDENT     = '^[_a-zA-Z][_a-zA-Z0-9]*$';
 local function isValidIdent( id )
