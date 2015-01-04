@@ -1,5 +1,11 @@
 local errno = require('lschema.ddl.errno');
 local lschema = require('lschema');
+local EXCEPTS = {
+    ['boolean'] = true,
+    ['table'] = true,
+    ['enum'] = true,
+    ['struct'] = true
+};
 local myschema = lschema.new('myschema');
 local isa, err, len, _;
 
@@ -31,14 +37,20 @@ for typ, val in pairs({
     ['struct'] = { field = 'str' }
 }) do
     -- does not support min constraint
-    if typ == 'boolean' or typ == 'table' or typ == 'enum' or typ == 'struct' then
+    if EXCEPTS[typ] then
+        if typ == 'enum' then
+            isa = myschema.isa( typ ):of( myschema.enum.myenum );
+        elseif typ == 'struct' then
+            isa = myschema.isa( typ ):of( myschema.struct.mystruct );
+        else
+            isa = myschema.isa( typ );
+        end
+        
         ifTrue(isolate(function()
-            isa = myschema.isa( typ ):min();
-            isa:makeCheck();
+            isa:min();
         end));
         ifTrue(isolate(function()
-            isa = myschema.isa( typ ):min( 1 );
-            isa:makeCheck();
+            isa:min( 1 );
         end));
     else
         -- invalid definition: no argument
@@ -73,13 +85,34 @@ for typ, val in pairs({
         end
         ifNotEqual( err.errno, errno.EMIN );
         ifNotEqual( err.etype, 'EMIN' );
-        
-        -- array
+    end
+    
+    -- array
+    -- does not support array
+    if typ == 'table' then
+        ifTrue(isolate(function()
+            isa = myschema.isa( typ .. '[]' );
+        end));
+    -- does not support min constraint
+    elseif EXCEPTS[typ] then
+        if typ == 'enum' then
+            isa = myschema.isa( typ .. '[]' ):of( myschema.enum.myenum );
+        elseif typ == 'struct' then
+            isa = myschema.isa( typ .. '[]' ):of( myschema.struct.mystruct );
+        else
+            isa = myschema.isa( typ .. '[]' );
+        end
+        -- invalid difinition
+        ifTrue(isolate(function()
+            isa:min();
+        end));
+    else
         -- invalid difinition: no argument
         ifTrue(isolate(function()
             isa = myschema.isa( typ .. '[]' ):min();
             isa:makeCheck();
         end));
+        
         -- valid difinition
         ifNotTrue(isolate(function()
             if typ == 'string' then
