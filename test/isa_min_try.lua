@@ -38,25 +38,22 @@ for typ, val in pairs({
 }) do
     -- does not support min constraint
     if EXCEPTS[typ] then
+        isa = myschema.isa( typ );
         if typ == 'enum' then
-            isa = myschema.isa( typ ):of( myschema.enum.myenum );
+            isa:of( myschema.enum.myenum );
         elseif typ == 'struct' then
-            isa = myschema.isa( typ ):of( myschema.struct.mystruct );
-        else
-            isa = myschema.isa( typ );
+            isa:of( myschema.struct.mystruct );
         end
         
+        -- attempt to access an undefined value
         ifTrue(isolate(function()
-            isa:min();
-        end));
-        ifTrue(isolate(function()
-            isa:min( 1 );
+            local fn = isa.min;
         end));
     else
+        isa = myschema.isa( typ );
         -- invalid definition: no argument
         ifTrue(isolate(function()
-            isa = myschema.isa( typ ):min();
-            isa:makeCheck();
+            isa:min();
         end));
         
         -- valid defintion
@@ -66,7 +63,7 @@ for typ, val in pairs({
             else
                 len = val;
             end
-            isa = myschema.isa( typ ):min( len );
+            isa:min( len );
             -- should not redefine
             ifTrue(isolate(function()
                 isa:min( len );
@@ -95,22 +92,21 @@ for typ, val in pairs({
         end));
     -- does not support min constraint
     elseif EXCEPTS[typ] then
+        isa = myschema.isa( typ .. '[]' );
         if typ == 'enum' then
-            isa = myschema.isa( typ .. '[]' ):of( myschema.enum.myenum );
+            isa:of( myschema.enum.myenum );
         elseif typ == 'struct' then
-            isa = myschema.isa( typ .. '[]' ):of( myschema.struct.mystruct );
-        else
-            isa = myschema.isa( typ .. '[]' );
+            isa:of( myschema.struct.mystruct );
         end
-        -- invalid difinition
+        -- attempt to access an undefined value
         ifTrue(isolate(function()
-            isa:min();
+            local fn = isa.min;
         end));
     else
+        isa = myschema.isa( typ .. '[]' );
         -- invalid difinition: no argument
         ifTrue(isolate(function()
-            isa = myschema.isa( typ .. '[]' ):min();
-            isa:makeCheck();
+            isa:min();
         end));
         
         -- valid difinition
@@ -120,7 +116,7 @@ for typ, val in pairs({
             else
                 len = val;
             end
-            isa = myschema.isa( typ .. '[]' ):min( len );
+            isa:min( len );
             -- should not redefine
             ifTrue(isolate(function()
                 isa:min( len );
