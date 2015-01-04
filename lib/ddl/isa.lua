@@ -94,8 +94,8 @@ local ISA_AKA = {
 };
 
 local ISA_OF = {
-    ['enum']        = require('lschema.ddl.enum'),
-    ['struct']      = require('lschema.ddl.struct')
+    ['enum']    = require('lschema.ddl.enum'),
+    ['struct']  = require('lschema.ddl.struct')
 };
 
 local function checkOfAttr( index, isa )
@@ -130,7 +130,7 @@ end
 -- @param   isa string | number | unsigned | int* | uint* | boolean | table | enum | struct
 function ISA:init( typ )
     local index = AUX.getIndex( self );
-    local asArray, methods;
+    local isa, asArray, methods;
 
     AUX.abort( 
         not typeof.string( typ ), 
