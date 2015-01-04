@@ -36,21 +36,20 @@ for typ, val in pairs({
     ['enum'] = 'name1',
     ['struct'] = { field = 'str' }
 }) do
+    isa = myschema.isa( typ );
+    if typ == 'enum' then
+        isa:of( myschema.enum.myenum );
+    elseif typ == 'struct' then
+        isa:of( myschema.struct.mystruct );
+    end
+    
     -- does not support max constraint
     if EXCEPTS[typ] then
-        isa = myschema.isa( typ );
-        if typ == 'enum' then
-            isa:of( myschema.enum.myenum );
-        elseif typ == 'struct' then
-            isa:of( myschema.struct.mystruct );
-        end
-        
         -- attempt to access an undefined value
         ifTrue(isolate(function()
             local fn = isa.max;
         end));
     else
-        isa = myschema.isa( typ );
         -- invalid definition: no argument
         ifTrue(isolate(function()
             isa:max();
@@ -90,52 +89,52 @@ for typ, val in pairs({
         ifTrue(isolate(function()
             isa = myschema.isa( typ .. '[]' );
         end));
-    -- does not support max constraint
-    elseif EXCEPTS[typ] then
+    else
         isa = myschema.isa( typ .. '[]' );
         if typ == 'enum' then
             isa:of( myschema.enum.myenum );
         elseif typ == 'struct' then
             isa:of( myschema.struct.mystruct );
         end
-        
-        -- attempt to access an undefined value
-        ifTrue(isolate(function()
-            local fn = isa.max;
-        end));
-    else
-        isa = myschema.isa( typ .. '[]' );
-        
-        -- invalid definition: no argument
-        ifTrue(isolate(function()
-            isa:max();
-        end));
-
-        -- valid difinition
-        ifNotTrue(isolate(function()
-            if typ == 'string' then
-                len = #val;
-            else
-                len = val;
-            end
-            isa:max( len );
-            -- should not redefine
+    
+        -- does not support max constraint
+        if EXCEPTS[typ] then
+            -- attempt to access an undefined value
             ifTrue(isolate(function()
-                isa:max( len );
+                local fn = isa.max;
             end));
-            isa:makeCheck();
-        end));
-        
-        -- valid validation
-        _, err = isa( {val} );
-        ifNotNil( err );
-        -- invalid validation
-        if typ == 'string' then
-            _, err = isa( {val .. val} );
         else
-            _, err = isa( {val + 1} );
+            -- invalid definition: no argument
+            ifTrue(isolate(function()
+                isa:max();
+            end));
+
+            -- valid difinition
+            ifNotTrue(isolate(function()
+                if typ == 'string' then
+                    len = #val;
+                else
+                    len = val;
+                end
+                isa:max( len );
+                -- should not redefine
+                ifTrue(isolate(function()
+                    isa:max( len );
+                end));
+                isa:makeCheck();
+            end));
+            
+            -- valid validation
+            _, err = isa( {val} );
+            ifNotNil( err );
+            -- invalid validation
+            if typ == 'string' then
+                _, err = isa( {val .. val} );
+            else
+                _, err = isa( {val + 1} );
+            end
+            ifNotEqual( err[1].errno, errno.EMAX );
+            ifNotEqual( err[1].etype, 'EMAX' );
         end
-        ifNotEqual( err[1].errno, errno.EMAX );
-        ifNotEqual( err[1].etype, 'EMAX' );
     end
 end
