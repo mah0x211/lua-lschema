@@ -1,5 +1,11 @@
 local errno = require('lschema.ddl.errno');
 local lschema = require('lschema');
+local EXCEPTS = {
+    ['boolean'] = true,
+    ['table'] = true,
+    ['enum'] = true,
+    ['struct'] = true
+};
 local myschema = lschema.new('myschema');
 local isa, err, len, _;
 
@@ -31,20 +37,25 @@ for typ, val in pairs({
     ['struct'] = { field = 'str' }
 }) do
     -- does not support max constraint
-    if typ == 'boolean' or typ == 'table' or typ == 'enum' or typ == 'struct' then
+    if EXCEPTS[typ] then
+        if typ == 'enum' then
+            isa = myschema.isa( typ ):of( myschema.enum.myenum );
+        elseif typ == 'struct' then
+            isa = myschema.isa( typ ):of( myschema.struct.mystruct );
+        else
+            isa = myschema.isa( typ );
+        end
+        
         ifTrue(isolate(function()
-            isa = myschema.isa( typ ):max();
-            isa:makeCheck();
+            isa:max();
         end));
         ifTrue(isolate(function()
-            isa = myschema.isa( typ ):max( 1 );
-            isa:makeCheck();
+            isa:max( 1 );
         end));
     else
         -- invalid definition: no argument
         ifTrue(isolate(function()
             isa = myschema.isa( typ ):max();
-            isa:makeCheck();
         end));
         
         -- valid defintion
@@ -73,13 +84,33 @@ for typ, val in pairs({
         end
         ifNotEqual( err.errno, errno.EMAX );
         ifNotEqual( err.etype, 'EMAX' );
-        
-        -- array
-        -- invalid difinition: no argument
+    end
+    
+    -- array
+    -- does not support array
+    if typ == 'table' then
+        ifTrue(isolate(function()
+            isa = myschema.isa( typ .. '[]' );
+        end));
+    -- does not support max constraint
+    elseif EXCEPTS[typ] then
+        if typ == 'enum' then
+            isa = myschema.isa( typ .. '[]' ):of( myschema.enum.myenum );
+        elseif typ == 'struct' then
+            isa = myschema.isa( typ .. '[]' ):of( myschema.struct.mystruct );
+        else
+            isa = myschema.isa( typ .. '[]' );
+        end
+        -- invalid difinition
+        ifTrue(isolate(function()
+            isa:max();
+        end));
+    else
+        -- invalid definition: no argument
         ifTrue(isolate(function()
             isa = myschema.isa( typ .. '[]' ):max();
-            isa:makeCheck();
         end));
+
         -- valid difinition
         ifNotTrue(isolate(function()
             if typ == 'string' then
