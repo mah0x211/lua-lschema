@@ -36,21 +36,20 @@ for typ, val in pairs({
     ['enum'] = 'name1',
     ['struct'] = { field = 'str' }
 }) do
+    isa = myschema.isa( typ );
+    if typ == 'enum' then
+        isa:of( myschema.enum.myenum );
+    elseif typ == 'struct' then
+        isa:of( myschema.struct.mystruct );
+    end
+    
     -- does not support min constraint
     if EXCEPTS[typ] then
-        isa = myschema.isa( typ );
-        if typ == 'enum' then
-            isa:of( myschema.enum.myenum );
-        elseif typ == 'struct' then
-            isa:of( myschema.struct.mystruct );
-        end
-        
         -- attempt to access an undefined value
         ifTrue(isolate(function()
             local fn = isa.min;
         end));
     else
-        isa = myschema.isa( typ );
         -- invalid definition: no argument
         ifTrue(isolate(function()
             isa:min();
@@ -90,50 +89,52 @@ for typ, val in pairs({
         ifTrue(isolate(function()
             isa = myschema.isa( typ .. '[]' );
         end));
-    -- does not support min constraint
-    elseif EXCEPTS[typ] then
+    else
         isa = myschema.isa( typ .. '[]' );
         if typ == 'enum' then
             isa:of( myschema.enum.myenum );
         elseif typ == 'struct' then
             isa:of( myschema.struct.mystruct );
         end
-        -- attempt to access an undefined value
-        ifTrue(isolate(function()
-            local fn = isa.min;
-        end));
-    else
-        isa = myschema.isa( typ .. '[]' );
-        -- invalid difinition: no argument
-        ifTrue(isolate(function()
-            isa:min();
-        end));
         
-        -- valid difinition
-        ifNotTrue(isolate(function()
-            if typ == 'string' then
-                len = #val;
-            else
-                len = val;
-            end
-            isa:min( len );
-            -- should not redefine
+        -- does not support min constraint
+        if EXCEPTS[typ] then
+            -- attempt to access an undefined value
             ifTrue(isolate(function()
-                isa:min( len );
+                local fn = isa.min;
             end));
-            isa:makeCheck();
-        end));
-        
-        -- valid validation
-        _, err = isa( {val} );
-        ifNotNil( err );
-        -- invalid validation
-        if typ == 'string' then
-            _, err = isa( {val:sub(1,#val-1)} );
         else
-            _, err = isa( {val - 1} );
+            -- invalid difinition: no argument
+            ifTrue(isolate(function()
+                isa:min();
+            end));
+            
+            -- valid difinition
+            ifNotTrue(isolate(function()
+                if typ == 'string' then
+                    len = #val;
+                else
+                    len = val;
+                end
+                isa:min( len );
+                -- should not redefine
+                ifTrue(isolate(function()
+                    isa:min( len );
+                end));
+                isa:makeCheck();
+            end));
+            
+            -- valid validation
+            _, err = isa( {val} );
+            ifNotNil( err );
+            -- invalid validation
+            if typ == 'string' then
+                _, err = isa( {val:sub(1,#val-1)} );
+            else
+                _, err = isa( {val - 1} );
+            end
+            ifNotEqual( err[1].errno, errno.EMIN );
+            ifNotEqual( err[1].etype, 'EMIN' );
         end
-        ifNotEqual( err[1].errno, errno.EMIN );
-        ifNotEqual( err[1].etype, 'EMIN' );
     end
 end
