@@ -98,6 +98,7 @@ local ISA_OF = {
     ['struct']  = require('lschema.ddl.struct')
 };
 
+
 local function checkOfAttr( index, isa )
     if isa == 'enum' or isa == 'struct' then
         AUX.abort( 
@@ -107,6 +108,7 @@ local function checkOfAttr( index, isa )
         );
     end
 end
+
 
 local function toboolean( arg )
     local t = type( arg );
@@ -192,16 +194,16 @@ function ISA:len( min, max )
     checkOfAttr( index, self.isa );
     AUX.abort( 
         not typeof.uint( min ), 
-        'min value of array length must be type of unsigned integer'
+        'minimum array length must be type of uint'
     );
     if max ~= nil then
         AUX.abort( 
             max and not typeof.uint( max ), 
-            'max value of array length must be type of unsigned integer'
+            'maximum array length must be type of uint'
         );
         AUX.abort( 
             max < min, 
-            'max value of array length must be greater than min value of length'
+            'maximum array length must be greater than minimum value'
         );
     end
     
@@ -209,6 +211,7 @@ function ISA:len( min, max )
     
     return self;
 end
+
 
 --- no duplicate
 function ISA:noDup( ... )
