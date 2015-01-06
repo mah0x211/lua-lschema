@@ -366,7 +366,8 @@ function ISA:makeCheck()
         struct = rawget( fields, 'struct' )
     };
     fields.attr = inspect( index['@'].attr );
-    if isa == 'table' and fields.default then
+    -- serialize table type default value
+    if typeof.table( fields.default ) then
         fields.default = inspect( fields.default );
     end
     
