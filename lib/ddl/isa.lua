@@ -339,7 +339,8 @@ function ISA:default( val )
     local isa = self.isa;
     local aka = ISA_AKA[isa] or isa;
     local tail = 1;
-    local arr, len, errmsgPrefix;
+    local arr, len, errmsgPrefix, noDup, dupIdx;
+    
     
     checkOfAttr( index, isa );
     if self.asArray then
@@ -368,6 +369,13 @@ function ISA:default( val )
                 'default value %q length must be less than %d', arr, len.max
             );
         end
+        
+        -- init noDup constraint check variables
+        if typeof.boolean( self.noDup ) and self.noDup then
+            dupIdx = {};
+            noDup = true;
+        end
+    
     -- wrap to table
     else
         arr = { val };
@@ -430,6 +438,16 @@ function ISA:default( val )
                     );
                 end
             end
+        end
+        
+        -- check noDup constraint
+        if noDup then
+            val = inspect( val );
+            AUX.abort(
+                dupIdx[val],
+                errmsgPrefix .. ' %q duplicated with #%d', val, dupIdx[val]
+            );
+            dupIdx[val] = i;
         end
     end
     
