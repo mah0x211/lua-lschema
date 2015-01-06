@@ -431,20 +431,25 @@ function ISA:default( val )
     local tail = 1;
     local arr, len, errmsgPrefix, noDup, dupIdx;
     
-    
     checkOfAttr( index, isa );
     if self.asArray then
         arr = val;
+        
+        -- manipulate error message
+        errmsgPrefix = ('could not set default value %q: '):format( 
+            tostring( val )
+        );
+        
         AUX.abort( 
             not typeof.table( arr ), 
-            'default value %q must be type of array(table)', arr
+            errmsgPrefix .. 'value must be type of array(table)'
         );
         
         -- check last index
         tail = lastIndex( arr );
         AUX.abort( 
             tail < 1,
-            'default value %q index must be start at 1', arr
+            errmsgPrefix .. 'index must be start at 1'
         );
         
         -- check array length constraint
@@ -452,11 +457,13 @@ function ISA:default( val )
             len = self.len;
             AUX.abort( 
                 tail < len.min, 
-                'default value %q length must be greater than %d', arr, len.min
+                errmsgPrefix .. 'minimum length constraint #%d violated',
+                len.min
             );
             AUX.abort( 
                 len.max and tail > len.max, 
-                'default value %q length must be less than %d', arr, len.max
+                errmsgPrefix .. 'maximum length constraint #%d violated',
+                len.max
             );
         end
         
@@ -477,20 +484,21 @@ function ISA:default( val )
         val = arr[i];
         
         -- manipulate error message
-        errmsgPrefix = 'default value' .. ( self.asArray and '#' .. i or '' );
-        
+        errmsgPrefix = 'could not set default value' .. 
+                       ( self.asArray and '#' .. i or '' ) .. 
+                       (' %q:'):format( tostring( val ) );
         -- check type
         AUX.abort( 
             not typeof[aka]( val ), 
-            errmsgPrefix .. ' %q must be type of %s', val, aka 
+            errmsgPrefix .. 'must be type of %s', aka 
         );
         
         -- for enum
         if isa == 'enum' then
             AUX.abort( 
                 not self.enum( val ), 
-                errmsgPrefix .. ' %q is not defined at enum %q',
-                val, self.enum['@'].name
+                errmsgPrefix .. 'value is not defined at enum %q',
+                self.enum['@'].name
             );
         else
             -- for string
@@ -499,8 +507,8 @@ function ISA:default( val )
                 if halo.instanceof( self.pattern, Pattern ) then
                     AUX.abort(
                         not self.pattern:exec( val ),
-                        errmsgPrefix .. ' %q does not match pattern %q',
-                        val, self.pattern['@'].name
+                        errmsgPrefix .. 'pattern constraint %q violated',
+                        self.pattern['@'].name
                     );
                 end
                 len = #val;
@@ -515,16 +523,16 @@ function ISA:default( val )
                 if typeof.finite( self.min ) then
                     AUX.abort(
                         len < self.min,
-                        errmsgPrefix .. ' %q must be greater than %d',
-                        val, self.min
+                        errmsgPrefix .. 'min constraint #%d violated',
+                        self.min
                     );
                 end
                 -- max check
                 if typeof.finite( self.max ) then
                     AUX.abort(
                         len > self.max,
-                        errmsgPrefix .. ' %q must be less than %d',
-                        val, self.max
+                        errmsgPrefix .. 'max constraint #%d violated',
+                        self.max
                     );
                 end
             end
@@ -535,7 +543,10 @@ function ISA:default( val )
             val = inspect( val );
             AUX.abort(
                 dupIdx[val],
-                errmsgPrefix .. ' %q duplicated with #%d', val, dupIdx[val]
+                errmsgPrefix ..
+                'noDup constraint violated - ' ..
+                'value duplicated with #%d',
+                dupIdx[val]
             );
             dupIdx[val] = i;
         end
