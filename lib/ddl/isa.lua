@@ -354,16 +354,16 @@ function ISA:makeCheck()
     fields = AUX.discardMethods( self );
     -- create environment
     env = {
-        rawset = rawset, 
-        rawget = rawget,
+        rawset      = rawset, 
+        rawget      = rawget,
         tonumber    = tonumber,
         tostring    = tostring,
         toboolean   = toboolean,
-        type = type,
-        typeof = typeof,
-        pattern = rawget( fields, 'pattern' ),
-        enum = rawget( fields, 'enum' ),
-        struct = rawget( fields, 'struct' )
+        type        = type,
+        typeof      = typeof,
+        pattern     = rawget( fields, 'pattern' ),
+        enum        = rawget( fields, 'enum' ),
+        struct      = rawget( fields, 'struct' )
     };
     fields.attr = inspect( index['@'].attr );
     -- serialize table type default value
