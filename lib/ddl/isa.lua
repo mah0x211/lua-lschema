@@ -227,7 +227,7 @@ function ISA:noDup( ... )
         local dupIdx = {};
         
         for idx, val in ipairs( self.default ) do
-            val = tostring( val );
+            val = inspect( val );
             AUX.abort( 
                 dupIdx[val],
                 'default value#%d %q duplicated with #%d', idx, val, dupIdx[val]
