@@ -321,7 +321,7 @@ function ISA:default( val )
     local isa = self.isa;
     local aka = ISA_AKA[isa] or isa;
     local tail = 1;
-    local arr, len;
+    local arr, len, errmsgPrefix;
     
     checkOfAttr( index, isa );
     if self.asArray then
@@ -360,17 +360,20 @@ function ISA:default( val )
         len = nil;
         val = arr[i];
         
+        -- manipulate error message
+        errmsgPrefix = 'default value' .. ( self.asArray and '#' .. i or '' );
+        
         -- check type
         AUX.abort( 
             not typeof[aka]( val ), 
-            'default value %q must be type of %s', val, aka 
+            errmsgPrefix .. ' %q must be type of %s', val, aka 
         );
         
         -- for enum
         if isa == 'enum' then
             AUX.abort( 
                 not self.enum( val ), 
-                'default value %q is not defined at enum %q',
+                errmsgPrefix .. ' %q is not defined at enum %q',
                 val, self.enum['@'].name
             );
         else
@@ -380,7 +383,7 @@ function ISA:default( val )
                 if halo.instanceof( self.pattern, Pattern ) then
                     AUX.abort(
                         not self.pattern:exec( val ),
-                        'default value %q does not match pattern %q',
+                        errmsgPrefix .. ' %q does not match pattern %q',
                         val, self.pattern['@'].name
                     );
                 end
@@ -396,7 +399,7 @@ function ISA:default( val )
                 if typeof.finite( self.min ) then
                     AUX.abort(
                         len < self.min,
-                        'default value %q must be greater than %d',
+                        errmsgPrefix .. ' %q must be greater than %d',
                         val, self.min
                     );
                 end
@@ -404,7 +407,7 @@ function ISA:default( val )
                 if typeof.finite( self.max ) then
                     AUX.abort(
                         len > self.max,
-                        'default value %q must be less than %d',
+                        errmsgPrefix .. ' %q must be less than %d',
                         val, self.max
                     );
                 end
