@@ -358,6 +358,28 @@ function ISA:max( max )
         'value must be greater than min constraint value #%d', 
         self.min
     );
+    -- check default value size
+    if not typeof.Function( self.default ) then
+        local defval = self.default;
+        
+        if self.asArray then
+            for idx, val in ipairs( defval ) do
+                AUX.abort(
+                    ( typeof.string( val ) and #val or val ) > max,
+                    'could not set max value constraint: ' .. 
+                    'default value#%d is greater than max constraint #%d',
+                    idx, max
+                );
+            end
+        else
+            AUX.abort(
+                ( typeof.string( defval ) and #defval or defval ) > max,
+                'could not set max value constraint: ' .. 
+                'default value is greater than max constraint #%d',
+                max
+            );
+        end
+    end
 
     rawset( AUX.getIndex( self ), 'max', max );
     
