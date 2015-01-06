@@ -344,22 +344,35 @@ end
 
 
 -- pattern
-function ISA:pattern( val )
+function ISA:pattern( pat )
     AUX.abort(
-        not halo.instanceof( val, Pattern ), 
-        'pattern must be instance of Pattern'
+        not halo.instanceof( pat, Pattern ), 
+        'could not set pattern constraint: ' ..
+        'value must be instance of Pattern'
     );
     
     -- check default value
     if not typeof.Function( self.default ) then
-        AUX.abort(
-             not val:exec( self.default ),
-            'pattern %q does not match to default value %q',
-            val['@'].name, self.default
-        );
+        if self.asArray then
+            for idx, val in ipairs( self.default ) do
+                AUX.abort(
+                    not pat:exec( val ),
+                    'could not set pattern constraint: ' ..
+                    'default value#d %q does not match to pattern %q',
+                    idx, val, pat['@'].name
+                );
+            end
+        else
+            AUX.abort(
+                not pat:exec( self.default ),
+                'could not set pattern constraint: ' ..
+                'default value %q does not match to pattern %q',
+                self.default, pat['@'].name
+            );
+        end
     end
     
-    rawset( AUX.getIndex( self ), 'pattern', val );
+    rawset( AUX.getIndex( self ), 'pattern', pat );
     
     return self;
 end
