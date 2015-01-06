@@ -319,22 +319,25 @@ end
 
 --- max
 -- @param   val number of maxium
-function ISA:max( val )
+function ISA:max( max )
     local numType = self.isa == 'string' and 'uint' or 
                     self.isa == 'number' and 'finite' or
                     self.isa;
     -- check type
     AUX.abort( 
-        not typeof[numType]( val ), 
-        'max %q must be %s number', val, numType
+        not typeof[numType]( max ), 
+        'could not set max constraint: ' .. 
+        '%q must be %s number', max, numType
     );
     -- check min constraint
     AUX.abort( 
-        typeof[numType]( self.min ) and val < self.min, 
-        'max %d must be greater than min: %d', val, self.min
+        typeof[numType]( self.min ) and max < self.min, 
+        'could not set max constraint: ' .. 
+        'value must be greater than min constraint value #%d', 
+        self.min
     );
-    
-    rawset( AUX.getIndex( self ), 'max', val );
+
+    rawset( AUX.getIndex( self ), 'max', max );
     
     return self;
 end
