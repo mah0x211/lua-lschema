@@ -194,17 +194,21 @@ function ISA:len( min, max )
     
     checkOfAttr( index, self.isa );
     AUX.abort( 
-        not typeof.uint( min ), 
-        'minimum array length must be type of uint'
+        not typeof.uint( min ),
+        'could not set len constraint: ' ..
+        'minimum value must be type of uint'
     );
     if max ~= nil then
         AUX.abort( 
-            max and not typeof.uint( max ), 
-            'maximum array length must be type of uint'
+            max and not typeof.uint( max ),
+            'could not set len constraint: ' ..
+            'maximum value must be type of uint'
         );
         AUX.abort( 
             max < min, 
-            'maximum array length must be greater than minimum value'
+            'could not set len constraint: ' ..
+            'maximum value #%d must be greater than ' .. 
+            'minimum value #%d', max, min
         );
     end
     
@@ -213,14 +217,18 @@ function ISA:len( min, max )
         local len = #self.default;
         
         AUX.abort( 
-            len < min, 
-            'could not set minimum array length constraint: ' .. 
-            'default value length is less than min#%d', min
+            len < min,
+            'could not set len constraint: ' ..
+            'default value length is less than ' ..
+            'minimum value #%d',
+            min
         );
         AUX.abort( 
-            len > max, 
-            'could not set maximum array length constraint: ' .. 
-            'default value length is greater than max#%d', max
+            len > max,
+            'could not set len constraint: ' ..
+            'default value length is greater than ' .. 
+            'maximum value #%d',
+            max
         );
     end
     
