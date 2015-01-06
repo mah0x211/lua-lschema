@@ -216,8 +216,26 @@ end
 
 --- no duplicate
 function ISA:noDup( ... )
+    local index = AUX.getIndex( self );
+    
+    checkOfAttr( index, self.isa );
     -- do not pass arguments
     AUX.abort( #{...} > 0, 'should not pass argument' );
+    
+    -- check default value duplication
+    if typeof.table( self.default ) then
+        local dupIdx = {};
+        
+        for idx, val in ipairs( self.default ) do
+            val = tostring( val );
+            AUX.abort( 
+                dupIdx[val],
+                'default value#%d %q duplicated with #%d', idx, val, dupIdx[val]
+            );
+            dupIdx[val] = idx;
+        end
+    end
+    
     rawset( AUX.getIndex( self ), 'noDup', true );
     
     return self;
