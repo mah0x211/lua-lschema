@@ -292,22 +292,26 @@ end
 
 --- min
 -- @param   val number of minimum
-function ISA:min( val )
+function ISA:min( min )
     local numType = self.isa == 'string' and 'uint' or 
                     self.isa == 'number' and 'finite' or
                     self.isa;
     -- check type
     AUX.abort( 
-        not typeof[numType]( val ), 
-        'min %q must be %s number', val, numType
+        not typeof[numType]( min ), 
+        'could not set min constraint: ' .. 
+        'value %q must be %s number', 
+        min, numType
     );
     -- check max constraint
     AUX.abort( 
-        typeof[numType]( self.max ) and val > self.max, 
-        'min %d must be less than max: %d', val, self.max
+        typeof[numType]( self.max ) and min > self.max, 
+        'could not set min constraint: ' ..
+        'value must be less than max constraint value #%d',
+        self.max
     );
     
-    rawset( AUX.getIndex( self ), 'min', val );
+    rawset( AUX.getIndex( self ), 'min', min );
     
     return self;
 end
