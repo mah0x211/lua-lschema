@@ -296,9 +296,11 @@ function VERIFIER:proc( arr, typeconv, trim, split, _ctx, _parent, _field, _idx 
         end
     end
     
--- empty array will be interpreted as a null
-<?if $.notNull ?>
-    -- not null
+<?if $.default ~= nil ?>
+    -- default
+    return <?put $.default ?>;
+<?elseif $.notNull ?>
+    -- empty array will be interpreted as a null
     return nil, { 
         errno = <?put errno.ENULL ?>,
         etype = 'ENULL',
