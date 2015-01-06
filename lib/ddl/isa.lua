@@ -254,7 +254,9 @@ function ISA:noDup( ... )
             val = inspect( val );
             AUX.abort( 
                 dupIdx[val],
-                'default value#%d %q duplicated with #%d', idx, val, dupIdx[val]
+                'could not set noDup constraint: ' ..
+                'default value#%d %q duplicated with #%d', 
+                idx, val, dupIdx[val]
             );
             dupIdx[val] = idx;
         end
