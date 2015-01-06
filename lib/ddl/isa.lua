@@ -208,6 +208,22 @@ function ISA:len( min, max )
         );
     end
     
+    -- check default value length
+    if typeof.table( self.default ) then
+        local len = #self.default;
+        
+        AUX.abort( 
+            len < min, 
+            'could not set minimum array length constraint: ' .. 
+            'default value length is less than min#%d', min
+        );
+        AUX.abort( 
+            len > max, 
+            'could not set maximum array length constraint: ' .. 
+            'default value length is greater than max#%d', max
+        );
+    end
+    
     rawset( index, 'len', { min = min, max = max } );
     
     return self;
