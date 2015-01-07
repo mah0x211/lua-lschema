@@ -84,6 +84,24 @@ local ISA_TYPE = {
     ['struct']      = {       'len', 'noDup', 'pattern', 'min', 'max', 'default' }
 };
 
+local ISA_TYPE_NAMES = table.concat({
+    'string',
+    'number',
+    'unsigned',
+    'int',
+    'int8',
+    'int16',
+    'int32',
+    'uint',
+    'uint8',
+    'uint16',
+    'uint32',
+    'boolean',
+    'table',
+    'enum',
+    'struct'
+}, ' | ' );
+
 local ISA_ARRAY_ATTR = {
     ['len']     = true,
     ['noDup']   = true
@@ -151,10 +169,7 @@ function ISA:init( typ )
         end
     end
     methods = ISA_TYPE[isa];
-    AUX.abort( 
-        not methods, 
-        'data type must be typeof string | number | unsigned | int* | uint* | boolean | table | enum | struct'
-    );
+    AUX.abort( not methods, 'data type must be the following types; %s', ISA_TYPE_NAMES );
     
     -- set isa
     rawset( index, 'isa', isa );
