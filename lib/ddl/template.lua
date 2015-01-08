@@ -239,8 +239,7 @@ end
 
 function VERIFIER:proc( arr, typeconv, trim, split, _ctx, _parent, _field, _idx )
     if arr ~= nil then
-        local errtbl = {};
-        local len, val, res, err, gotError;
+        local len;
         
         if type( arr ) ~= 'table' then
             return nil, { 
@@ -267,6 +266,8 @@ function VERIFIER:proc( arr, typeconv, trim, split, _ctx, _parent, _field, _idx 
 
         if len and len > 0 then
             local result = trim == true and {} or arr;
+            local errtbl = {};
+            local val, res, err, gotError;
 <?if $.noDup ?>
             local dupIdx = {};
             local dupVal;
