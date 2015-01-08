@@ -26,10 +26,27 @@
   Created by Masatoshi Teruya on 14/06/09.
 
 --]]
+-- module
 local halo = require('halo');
 local typeof = require('util.typeof');
 local AUX = require('lschema.aux');
 local Template = require('lschema.ddl.template');
+-- constants
+local PAT_FIELD_IDENT = '^[_a-zA-Z][-_a-zA-Z0-9]*[a-zA-Z0-9]$';
+-- internal function
+local function isValidFieldIdent( id )
+    AUX.abort( 
+        not typeof.string( id ), 
+        'identifier must be type of string: %q', tostring(id) 
+    );
+    AUX.abort( 
+        not id:find( PAT_FIELD_IDENT ), 
+        'identifier format must be %q : %q', PAT_FIELD_IDENT, tostring(id)
+    );
+end
+
+
+-- class
 local Struct = halo.class.Struct;
 
 Struct.inherits {
@@ -49,7 +66,7 @@ function Struct:init( name, tbl )
         'argument must be type of table'
     );
     for id, isa in pairs( tbl ) do
-        AUX.isValidIdent( id );
+        isValidFieldIdent( id );
         AUX.abort( 
             rawget( index, id ), 
             'identifier %q already defined', id 
