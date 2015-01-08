@@ -191,7 +191,7 @@ function VERIFIER:proc( val, typeconv, trim, split, _ctx, _parent, _field, _idx 
     
 <?if $.default ~= nil ?>
     -- default
-    return <?if $.isa == 'table' 
+    return <?if $.isa == 'table' or $.isa == 'struct' 
     ?><?put $.default 
     ?><?else
     ?><?$put $.default 
