@@ -81,7 +81,7 @@ local ISA_TYPE = {
     ['boolean']     = { 'of', 'len', 'noDup', 'pattern', 'min', 'max' },
     ['table']       = { 'of', 'len', 'noDup', 'pattern', 'min', 'max', 'unique' },
     ['enum']        = {       'len', 'noDup', 'pattern', 'min', 'max' },
-    ['struct']      = {       'len', 'noDup', 'pattern', 'min', 'max', 'default' }
+    ['struct']      = {       'len', 'noDup', 'pattern', 'min', 'max' }
 };
 
 local ISA_TYPE_NAMES = table.concat({
@@ -109,7 +109,8 @@ local ISA_ARRAY_ATTR = {
 
 local ISA_AKA = {
     ['number']  = 'finite',
-    ['enum']    = 'string'
+    ['enum']    = 'string',
+    ['struct']  = 'table'
 };
 
 local ISA_OF = {
@@ -176,8 +177,7 @@ function ISA:init( typ )
     rawset( index, 'asArray', asArray ~= nil );
     -- remove unused methods
     for _, method in ipairs( methods ) do
-        if not ISA_ARRAY_ATTR[method] or not asArray or 
-           isa == 'struct' and method == 'noDup' then
+        if not ISA_ARRAY_ATTR[method] or not asArray then
             rawset( index, method, nil );
         end
     end
@@ -444,7 +444,7 @@ function ISA:default( val )
     local isa = self.isa;
     local aka = ISA_AKA[isa] or isa;
     local tail = 1;
-    local arr, len, errmsgPrefix, noDup, dupIdx;
+    local arr, len, errmsgPrefix, noDup, dupIdx, err, _;
     
     checkOfAttr( index, isa );
     if self.asArray then
@@ -501,19 +501,25 @@ function ISA:default( val )
         -- manipulate error message
         errmsgPrefix = 'could not set default value' .. 
                        ( self.asArray and '#' .. i or '' ) .. 
-                       (' %q:'):format( tostring( val ) );
+                       (' %q: '):format( tostring( val ) );
         -- check type
         AUX.abort( 
             not typeof[aka]( val ), 
             errmsgPrefix .. 'must be type of %s', aka 
         );
         
-        -- for enum
         if isa == 'enum' then
             AUX.abort( 
                 not self.enum( val ), 
                 errmsgPrefix .. 'value is not defined at enum %q',
                 self.enum['@'].name
+            );
+        elseif isa == 'struct' then
+            _, err = self.struct( val );
+            AUX.abort(
+                err,
+                errmsgPrefix .. 'value does not match to struct %q',
+                self.struct['@'].name
             );
         else
             -- for string
