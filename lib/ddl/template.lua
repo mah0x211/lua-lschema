@@ -255,7 +255,7 @@ function VERIFIER:proc( arr, typeconv, trim, split, _ctx, _parent, _field, _idx 
         
 <?if $.len ?>
         -- length 
-        if len < <?put $.len.min ?> <?if $.len.max 
+        if not len or len < <?put $.len.min ?> <?if $.len.max 
         ?>or len > <?put $.len.max ?><?end?> then
             return nil, { 
                 errno = <?put errno.ELEN ?>,
@@ -265,7 +265,7 @@ function VERIFIER:proc( arr, typeconv, trim, split, _ctx, _parent, _field, _idx 
         end
 <?end?>
 
-        if len > 0 then
+        if len and len > 0 then
             local result = trim == true and {} or arr;
 <?if $.noDup ?>
             local dupIdx = {};
