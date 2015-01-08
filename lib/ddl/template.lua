@@ -26,12 +26,15 @@
   Created by Masatoshi Teruya on 14/06/27.
 
 --]]
-
+-- module
 local eval = require('util').eval;
 local inspect = require('util').inspect;
 local keys = require('util.table').keys;
 local tsukuyomi = require('tsukuyomi');
-
+-- constants
+local INSPECT_OPT = { 
+    depth = 0 
+};
 local ISA_AKA = {
     ['number']  = 'finite',
     ['enum']    = 'string',
@@ -437,10 +440,11 @@ local function renderISA( fields, env )
     return render( fields.asArray and 'ISA_ARRAY' or 'ISA', fields, env );
 end
 
+
 local function renderEnum( fields, attr )
     return render( 'ENUM', {
-        fields = inspect( fields ),
-        attr = inspect( attr )
+        fields = inspect( fields, INSPECT_OPT ),
+        attr = inspect( attr, INSPECT_OPT )
     }, ENUM_ENV );
 end
 
@@ -467,9 +471,9 @@ local function renderStruct( fields, name, attr )
     fields = keys( fields );
     return render( 'STRUCT', {
         name = ('%q'):format( name ),
-        fields = inspect( fields ),
-        attr = inspect( attr ),
-        splitAttr = inspect( splitAttr )
+        fields = inspect( fields, INSPECT_OPT ),
+        attr = inspect( attr, INSPECT_OPT ),
+        splitAttr = inspect( splitAttr, INSPECT_OPT )
     }, STRUCT_ENV );
 end
 

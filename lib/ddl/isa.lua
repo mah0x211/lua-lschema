@@ -26,6 +26,7 @@
   Created by Masatoshi Teruya on 14/06/08.
 
 --]]
+-- module
 local halo = require('halo');
 local inspect = require('util').inspect;
 local typeof = require('util').typeof;
@@ -33,10 +34,9 @@ local lastIndex = require('util.table').lastIndex;
 local AUX = require('lschema.aux');
 local Template = require('lschema.ddl.template');
 local Pattern = require('lschema.ddl.pattern');
-local ISA = halo.class.ISA;
-
-ISA.inherits {
-    'lschema.unchangeable.Unchangeable'
+-- constants
+local INSPECT_OPT = { 
+    depth = 0 
 };
 
 
@@ -145,6 +145,14 @@ local function toboolean( arg )
         return typeof.finite( arg ) and arg ~= 0;
     end
 end
+
+
+-- class
+local ISA = halo.class.ISA;
+
+ISA.inherits {
+    'lschema.unchangeable.Unchangeable'
+};
 
 
 --- initializer
@@ -266,7 +274,7 @@ function ISA:noDup( ... )
         local dupIdx = {};
         
         for idx, val in ipairs( self.default ) do
-            val = inspect( val );
+            val = inspect( val, INSPECT_OPT );
             AUX.abort( 
                 dupIdx[val],
                 'could not set noDup constraint: ' ..
@@ -561,7 +569,7 @@ function ISA:default( val )
         
         -- check noDup constraint
         if noDup then
-            val = inspect( val );
+            val = inspect( val, INSPECT_OPT );
             AUX.abort(
                 dupIdx[val],
                 errmsgPrefix ..
@@ -600,10 +608,10 @@ function ISA:makeCheck()
         enum        = rawget( fields, 'enum' ),
         struct      = rawget( fields, 'struct' )
     };
-    fields.attr = inspect( index['@'].attr );
+    fields.attr = inspect( index['@'].attr, INSPECT_OPT );
     -- serialize table type default value
     if typeof.table( fields.default ) then
-        fields.default = inspect( fields.default );
+        fields.default = inspect( fields.default, INSPECT_OPT );
     end
     
     -- make check function
