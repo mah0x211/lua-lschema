@@ -216,6 +216,7 @@ return VERIFIER.proc;
 
 local ISA_ARRAY = ([[
 #PREPARE
+local lastIndex = lastIndex;
 
 local function checkVal( val, typeconv, trim, split, _ctx, _parent, _field, _idx )
 
@@ -249,7 +250,8 @@ function VERIFIER:proc( arr, typeconv, trim, split, _ctx, _parent, _field, _idx 
             };
         end
         
-        len = #arr;
+        -- get last index
+        len = lastIndex( arr );
         
 <?if $.len ?>
         -- length 

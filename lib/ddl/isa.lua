@@ -606,7 +606,8 @@ function ISA:makeCheck()
         typeof      = typeof,
         pattern     = rawget( fields, 'pattern' ),
         enum        = rawget( fields, 'enum' ),
-        struct      = rawget( fields, 'struct' )
+        struct      = rawget( fields, 'struct' ),
+        lastIndex   = self.asArray and require('util.table').lastIndex or nil
     };
     fields.attr = inspect( index['@'].attr, INSPECT_OPT );
     -- serialize table type default value
