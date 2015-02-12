@@ -146,7 +146,7 @@ local VERIFIER = {};
     ['#STRUCT'] = [[
 <?if $.struct ?>
         -- struct
-        return struct( val, typeconv, trim, split, _ctx, _parent, _field, _idx );
+        return struct( val, typeconv, trim, split, _rel, _field, _idx );
 <?else?>
         return val;
 <?end?>
@@ -170,7 +170,7 @@ local VERIFIER = {};
 
 local ISA = ([[
 #PREPARE
-function VERIFIER:proc( val, typeconv, trim, split, _ctx, _parent, _field, _idx )
+function VERIFIER:proc( val, typeconv, trim, split, _rel, _field, _idx )
     if val ~= nil then
 <?if $.min or $.max ?>
         local len;
@@ -218,7 +218,7 @@ local ISA_ARRAY = ([[
 #PREPARE
 local lastIndex = lastIndex;
 
-local function checkVal( val, typeconv, trim, split, _ctx, _parent, _field, _idx )
+local function checkVal( val, typeconv, trim, split, _rel, _field, _idx )
 
 #TYPECONV
 
@@ -237,7 +237,7 @@ local function checkVal( val, typeconv, trim, split, _ctx, _parent, _field, _idx
 
 end
 
-function VERIFIER:proc( arr, typeconv, trim, split, _ctx, _parent, _field, _idx )
+function VERIFIER:proc( arr, typeconv, trim, split, _rel, _field, _idx )
     if arr ~= nil then
         local len;
         
@@ -274,7 +274,9 @@ function VERIFIER:proc( arr, typeconv, trim, split, _ctx, _parent, _field, _idx 
 <?end?>
             for idx = 1, len do
                 val = arr[idx];
-                res, err = checkVal( val, typeconv, trim, split, _ctx, _parent, _field, idx );
+                res, err = checkVal( 
+                    val, typeconv, trim, split, _rel, _field, idx 
+                );
 <?if $.noDup ?>
                 dupVal = tostring( res );
 <?end?>
@@ -323,7 +325,6 @@ return VERIFIER.proc;
 
 local ENUM = [[
 -- enum
-
 local ENUM = <?put $.fields ?>;
 local VERIFIER = {};
 function VERIFIER:proc( val )
@@ -342,26 +343,77 @@ return VERIFIER.proc;
 ]];
 local ENUM_ENV = {};
 
-local STRUCT = [[
--- struct: <?put $.name ?>
 
+local STRUCT = [=[
+-- struct: <?put $.name ?>
 local FIELDS = <?put $.fields ?>
 local NFIELDS = #FIELDS;
 local VERIFIER = {};
 
-function VERIFIER:proc( tbl, typeconv, trim, split, _ctx, _parent, _field, _idx )
+function VERIFIER:proc( tbl, typeconv, trim, split, _rel, _field, _idx )
     if type( tbl ) == 'table' then
         local result = trim == true and {} or tbl;
         local errtbl = {};
         local field, val, err, gotError;
-
-        if split and not _ctx then
-            _ctx = {};
+        
+        -- split struct members
+        if split then
+            local rel = {};
+            local data = {};
+            local nstack;
+            
+            for idx = 1, NFIELDS do
+                field = FIELDS[idx];
+                nstack = #split;
+                val, err = self[field]( 
+                    tbl[field], typeconv, trim, split, rel, field 
+                );
+                if err then
+                    errtbl[field] = err;
+                    result[field] = tbl[field];
+                    gotError = true;
+                else
+                    result[field] = val;
+                    if #split == nstack then
+                        data[field] = val;
+                    end
+                end
+            end
+            
+            if gotError then
+                return result, errtbl;
+            elseif _rel then
+                split[#split+1] = {
+                    struct = <?put $.name ?>,
+                    -- relation
+                    rel = {
+                        field = _field,
+                        idx = _idx
+                    },
+                    -- field data
+                    data = data
+                };
+                -- set stack-index to parent relation table
+                _rel[#_rel+1] = #split;
+            else
+                split[#split+1] = {
+                    struct = <?put $.name ?>,
+                    data = data
+                };
+            end
+            
+            -- add current stack-index into related struct
+            for i = 1, #rel do
+                split[rel[i]].rel.stack = #split;
+            end
+            
+            return result;
         end
         
+        -- non-split verify
         for idx = 1, NFIELDS do
             field = FIELDS[idx];
-            val, err = self[field]( tbl[field], typeconv, trim, split, _ctx, result, field );
+            val, err = self[field]( tbl[field], typeconv, trim );
             if err then
                 errtbl[field] = err;
                 result[field] = tbl[field];
@@ -373,24 +425,9 @@ function VERIFIER:proc( tbl, typeconv, trim, split, _ctx, _parent, _field, _idx 
         
         if gotError then
             return result, errtbl;
-        elseif not split then
-            return result;
-        elseif _parent then
-            _ctx[#_ctx+1] = {
-                struct = <?put $.name ?>,
-                parent = _parent,
-                field = _field,
-                idx = _idx,
-                data = result,
-                attr = <?put $.splitAttr ?>
-            };
-        else
-            _ctx[#_ctx+1] = {
-                data = result
-            };
         end
         
-        return _parent and result or _ctx;
+        return result;
     end
     
     return nil, { 
@@ -401,7 +438,7 @@ function VERIFIER:proc( tbl, typeconv, trim, split, _ctx, _parent, _field, _idx 
 end
 
 return VERIFIER.proc;
-]];
+]=];
 local STRUCT_ENV = {
     type = type
 };
@@ -429,6 +466,7 @@ do
     assert( not err, err );
 end
 
+
 local function render( label, data, env )
     local fn, ok = Template:render( label, data );
     
@@ -438,6 +476,7 @@ local function render( label, data, env )
     
     return fn();
 end
+
 
 local function renderISA( fields, env )
     return render( fields.asArray and 'ISA_ARRAY' or 'ISA', fields, env );
@@ -452,33 +491,15 @@ local function renderEnum( fields, attr )
 end
 
 
-local SPLIT_ATTRS = {
-    isa = true,
-    unique = true
-};
 local function renderStruct( fields, name, attr )
-    local splitAttr = {};
-    local tbl;
-    
-    -- remove redundant fields
-    for k, v in pairs( attr ) do
-        tbl = {};
-        splitAttr[k] = tbl;
-        for ck, cv in pairs( v ) do
-            if SPLIT_ATTRS[ck] then
-                tbl[ck] = cv;
-            end
-        end
-    end
-    
     fields = keys( fields );
     return render( 'STRUCT', {
         name = ('%q'):format( name ),
         fields = inspect( fields, INSPECT_OPT ),
-        attr = inspect( attr, INSPECT_OPT ),
-        splitAttr = inspect( splitAttr, INSPECT_OPT )
+        attr = inspect( attr, INSPECT_OPT )
     }, STRUCT_ENV );
 end
+
 
 return {
     renderISA = renderISA,
