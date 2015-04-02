@@ -85,7 +85,8 @@ end
     MARK: Method
 --]]
 function Pattern:init( _, tbl )
-    local index;
+    local own = protected( self );
+    local index = AUX.getIndex( self );
     
     AUX.abort( 
         not typeof.table( tbl ), 
@@ -96,16 +97,25 @@ function Pattern:init( _, tbl )
         'pattern[1] must be type of string'
     );
     
-    self = AUX.posing( lrex.new( unpack( tbl ) ), self );
-    index = AUX.getIndex( self );
-    rawset( index, '@', {
+    index['@'] = {
         attr = {
             regex = tbl[1],
             opts = select( 2, tbl )
         }
-    });
+    };
+    own.regex = lrex.new( unpack( tbl ) );
     
     return self;
+end
+
+
+function Pattern:exec( ... )
+    return protected( self ).regex:exec( ... );   
+end
+
+
+function Pattern:match( ... )
+    return protected( self ).regex:match( ... );   
 end
 
 
