@@ -17,8 +17,6 @@ myschema.struct 'mystruct' {
 for typ, val in pairs({
     ['string'] = 'str',
     ['number'] = 1,
-    ['unsigned'] = 1,
-    ['int'] = 1,
     ['int8'] = 1,
     ['int16'] = 1,
     ['int32'] = 1,

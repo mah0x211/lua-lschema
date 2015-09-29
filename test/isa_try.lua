@@ -6,8 +6,6 @@ local isa = schema.isa;
 for _, typ in ipairs({
     'string',
     'number',
-    'unsigned',
-    'int',
     'int8',
     'int16',
     'int32',

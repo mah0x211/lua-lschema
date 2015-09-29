@@ -3,6 +3,7 @@ local lschema = require('lschema');
 local myschema = ifNil( lschema.new('myschema') );
 local enum = myschema.enum;
 
+
 -- indentity pattern: ^[_a-zA-Z][_a-zA-Z0-9]*$
 -- invalid ident
 ifTrue(isolate(function()

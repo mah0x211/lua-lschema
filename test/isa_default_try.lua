@@ -64,8 +64,6 @@ end
 for typ, val in pairs({
     ['string'] = 'str',
     ['number'] = 1,
-    ['unsigned'] = 1,
-    ['int'] = 1,
     ['int8'] = 126,
     ['int16'] = 32766,
     ['int32'] = 2147483646,
