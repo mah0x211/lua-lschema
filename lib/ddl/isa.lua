@@ -29,7 +29,7 @@
 -- module
 local halo = require('halo');
 local inspect = require('util').inspect;
-local typeof = require('util').typeof;
+local is = require('util.is');
 local lastIndex = require('util.table').lastIndex;
 local AUX = require('lschema.aux');
 local Template = require('lschema.ddl.template');
@@ -136,7 +136,7 @@ local function toboolean( arg )
             return false;
         end
     elseif t == 'number' then
-        return typeof.finite( arg ) and arg ~= 0;
+        return is.finite( arg ) and arg ~= 0;
     end
 end
 
@@ -157,7 +157,7 @@ function ISA:init( typ )
     local isa, asArray, methods;
 
     AUX.abort( 
-        not typeof.string( typ ), 
+        not is.string( typ ),
         'argument must be type of string'
     );
     
@@ -211,13 +211,13 @@ function ISA:len( min, max )
     
     checkOfAttr( index, self.isa );
     AUX.abort( 
-        not typeof.uint( min ),
+        not is.uint( min ),
         'could not set len constraint: ' ..
         'minimum value must be type of uint'
     );
     if max ~= nil then
         AUX.abort( 
-            max and not typeof.uint( max ),
+            max and not is.uint( max ),
             'could not set len constraint: ' ..
             'maximum value must be type of uint'
         );
@@ -230,7 +230,7 @@ function ISA:len( min, max )
     end
     
     -- check default value length
-    if typeof.table( self.default ) then
+    if is.table( self.default ) then
         local len = #self.default;
         
         AUX.abort( 
@@ -264,7 +264,7 @@ function ISA:noDup( ... )
     AUX.abort( #{...} > 0, 'should not pass argument' );
     
     -- check default value duplication
-    if typeof.table( self.default ) then
+    if is.table( self.default ) then
         local dupIdx = {};
         
         for idx, val in ipairs( self.default ) do
@@ -315,26 +315,26 @@ function ISA:min( min )
                     self.isa;
     -- check type
     AUX.abort( 
-        not typeof[numType]( min ), 
+        not is[numType]( min ), 
         'could not set min constraint: ' .. 
         'value %q must be %s number', 
         min, numType
     );
     -- check max constraint
     AUX.abort( 
-        typeof[numType]( self.max ) and min > self.max, 
+        is[numType]( self.max ) and min > self.max, 
         'could not set min constraint: ' ..
         'value must be less than max constraint value #%d',
         self.max
     );
     -- check default value size
-    if not typeof.Function( self.default ) then
+    if not is.Function( self.default ) then
         local defval = self.default;
         
         if self.asArray then
             for idx, val in ipairs( defval ) do
                 AUX.abort(
-                    ( typeof.string( val ) and #val or val ) < min,
+                    ( is.string( val ) and #val or val ) < min,
                     'could not set min value constraint: ' .. 
                     'default value#%d is less than min constraint value #%d',
                     idx, min
@@ -342,7 +342,7 @@ function ISA:min( min )
             end
         else
             AUX.abort(
-                ( typeof.string( defval ) and #defval or defval ) < min,
+                ( is.string( defval ) and #defval or defval ) < min,
                 'could not set min value constraint: ' .. 
                 'default value is less than min constraint value #%d',
                 min
@@ -364,25 +364,25 @@ function ISA:max( max )
                     self.isa;
     -- check type
     AUX.abort( 
-        not typeof[numType]( max ), 
+        not is[numType]( max ), 
         'could not set max constraint: ' .. 
         '%q must be %s number', max, numType
     );
     -- check min constraint
     AUX.abort( 
-        typeof[numType]( self.min ) and max < self.min, 
+        is[numType]( self.min ) and max < self.min, 
         'could not set max constraint: ' .. 
         'value must be greater than min constraint value #%d', 
         self.min
     );
     -- check default value size
-    if not typeof.Function( self.default ) then
+    if not is.Function( self.default ) then
         local defval = self.default;
         
         if self.asArray then
             for idx, val in ipairs( defval ) do
                 AUX.abort(
-                    ( typeof.string( val ) and #val or val ) > max,
+                    ( is.string( val ) and #val or val ) > max,
                     'could not set max value constraint: ' .. 
                     'default value#%d is greater than max constraint #%d',
                     idx, max
@@ -390,7 +390,7 @@ function ISA:max( max )
             end
         else
             AUX.abort(
-                ( typeof.string( defval ) and #defval or defval ) > max,
+                ( is.string( defval ) and #defval or defval ) > max,
                 'could not set max value constraint: ' .. 
                 'default value is greater than max constraint #%d',
                 max
@@ -413,7 +413,7 @@ function ISA:pattern( pat )
     );
     
     -- check default value
-    if not typeof.Function( self.default ) then
+    if not is.Function( self.default ) then
         if self.asArray then
             for idx, val in ipairs( self.default ) do
                 AUX.abort(
@@ -458,7 +458,7 @@ function ISA:default( val )
         );
         
         AUX.abort( 
-            not typeof.table( arr ), 
+            not is.table( arr ),
             errmsgPrefix .. 'value must be type of array(table)'
         );
         
@@ -470,7 +470,7 @@ function ISA:default( val )
         );
         
         -- check array length constraint
-        if typeof.table( self.len ) then
+        if is.table( self.len ) then
             len = self.len;
             AUX.abort( 
                 tail < len.min, 
@@ -485,7 +485,7 @@ function ISA:default( val )
         end
         
         -- init noDup constraint check variables
-        if typeof.boolean( self.noDup ) and self.noDup then
+        if is.boolean( self.noDup ) and self.noDup then
             dupIdx = {};
             noDup = true;
         end
@@ -506,7 +506,7 @@ function ISA:default( val )
                        (' %q: '):format( tostring( val ) );
         -- check type
         AUX.abort( 
-            not typeof[aka]( val ), 
+            not is[aka]( val ), 
             errmsgPrefix .. 'must be type of %s', aka 
         );
         
@@ -536,14 +536,14 @@ function ISA:default( val )
                 end
                 len = #val;
             -- for number
-            elseif typeof.finite( val ) then
+            elseif is.finite( val ) then
                 len = val;
             end
             
             -- check min/max constraint
             if len then
                 -- min check
-                if typeof.finite( self.min ) then
+                if is.finite( self.min ) then
                     AUX.abort(
                         len < self.min,
                         errmsgPrefix .. 'min constraint #%d violated',
@@ -551,7 +551,7 @@ function ISA:default( val )
                     );
                 end
                 -- max check
-                if typeof.finite( self.max ) then
+                if is.finite( self.max ) then
                     AUX.abort(
                         len > self.max,
                         errmsgPrefix .. 'max constraint #%d violated',
@@ -597,7 +597,7 @@ function ISA:makeCheck()
         tostring    = tostring,
         toboolean   = toboolean,
         type        = type,
-        typeof      = typeof,
+        is          = is,
         pattern     = rawget( fields, 'pattern' ),
         enum        = rawget( fields, 'enum' ),
         struct      = rawget( fields, 'struct' ),
@@ -605,7 +605,7 @@ function ISA:makeCheck()
     };
     fields.attr = inspect( index['@'].attr, INSPECT_OPT );
     -- serialize table type default value
-    if typeof.table( fields.default ) then
+    if is.table( fields.default ) then
         fields.default = inspect( fields.default, INSPECT_OPT );
     end
     

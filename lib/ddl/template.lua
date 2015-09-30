@@ -71,7 +71,7 @@ local tostring = tostring;
 local tonumber = tonumber;
 local toboolean = toboolean;
 local type = type;
-local typeof = typeof;
+local is = is;
 <?if $.struct ?>local struct = struct;<?end?>
 <?if $.pattern ?>local pattern = pattern;<?end?>
 <?if $.enum ?>local enum = enum;<?end?>
@@ -175,7 +175,7 @@ function VERIFIER:proc( val, typeconv, trim, split, _rel, _field, _idx )
 
 #TYPECONV
 
-        if not typeof.<?put AKA[$.isa] or $.isa ?>( val ) then
+        if not is.<?put AKA[$.isa] or $.isa ?>( val ) then
             return nil, { 
                 errno = <?put errno.ETYPE ?>, 
                 etype = 'ETYPE',
@@ -219,7 +219,7 @@ local function checkVal( val, typeconv, trim, split, _rel, _field, _idx )
 
 #TYPECONV
 
-    if not typeof.<?put AKA[$.isa] or $.isa ?>( val ) then
+    if not is.<?put AKA[$.isa] or $.isa ?>( val ) then
         return nil, { 
             errno = <?put errno.ETYPE ?>,
             etype = 'ETYPE',

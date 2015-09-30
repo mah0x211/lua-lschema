@@ -28,7 +28,7 @@
 --]]
 
 -- module
-local typeof = require('util.typeof');
+local is = require('util.is');
 local AUX = require('lschema.aux');
 -- constants
 local RESERVED_IDENT = {
@@ -56,7 +56,7 @@ function Container:__call( name )
         'identifier %q is reserved word', tostring(name)
     );
     AUX.abort( 
-        not typeof.Nil( rawget( index, name ) ), 
+        not is.Nil( rawget( index, name ) ),
         'idenifier %q already defined', tostring(name)
     );
     return function( ... )

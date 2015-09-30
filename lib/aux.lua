@@ -26,7 +26,7 @@
   Created by Masatoshi Teruya on 14/06/25.
 
 --]]
-local typeof = require('util.typeof');
+local is = require('util.is');
 local lastIndex = require('util.table').lastIndex;
 local split = require('util.string').split;
 local AUX = require('halo').class.AUX;
@@ -91,7 +91,7 @@ end
 local PAT_IDENT     = '^[_a-zA-Z][_a-zA-Z0-9]*$';
 local function isValidIdent( id )
     abort( 
-        not typeof.string( id ), 
+        not is.string( id ),
         'identifier must be type of string: %q', tostring(id) 
     );
     abort( 
@@ -108,11 +108,11 @@ local function getAttrs( fields )
     for k,v in pairs( fields ) do
         if k == 'pattern' then
             attr[k] = v['@'].attr;
-        elseif typeof.table( v ) then
+        elseif is.table( v ) then
             attr[k] = v['@'] and v['@'].attr or v;
         elseif k == 'default' then
             attr[k] = v;
-        elseif typeof.boolean( v ) then
+        elseif is.boolean( v ) then
             if v then
                 attr[k] = v;
             end
@@ -132,7 +132,7 @@ local function discardMethods( obj )
     
     for k,v in pairs( index ) do
         if k ~= 'constructor' then
-            if typeof.Function( v ) then
+            if is.Function( v ) then
                 rawset( index, k, nil );
             else
                 rawset( fields, k, v );

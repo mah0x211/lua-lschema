@@ -28,7 +28,7 @@
 --]]
 -- module
 local halo = require('halo');
-local typeof = require('util.typeof');
+local is = require('util.is');
 local AUX = require('lschema.aux');
 local Template = require('lschema.ddl.template');
 -- constants
@@ -36,7 +36,7 @@ local PAT_FIELD_IDENT = '^[_a-zA-Z][-_a-zA-Z0-9]*[a-zA-Z0-9]$';
 -- internal function
 local function isValidFieldIdent( id )
     AUX.abort( 
-        not typeof.string( id ), 
+        not is.string( id ),
         'identifier must be type of string: %q', tostring(id) 
     );
     AUX.abort( 
@@ -62,7 +62,7 @@ function Struct:init( name, tbl )
     local hasFields, fn;
     
     AUX.abort( 
-        not typeof.table( tbl ), 
+        not is.table( tbl ),
         'argument must be type of table'
     );
     for id, isa in pairs( tbl ) do

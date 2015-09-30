@@ -27,7 +27,7 @@
 
 --]]
 
-local typeof = require('util.typeof');
+local is = require('util.is');
 local lrex = require('rex_pcre');
 local unpack = unpack or table.unpack;
 local AUX = require('lschema.aux');
@@ -89,11 +89,11 @@ function Pattern:init( _, tbl )
     local index = AUX.getIndex( self );
     
     AUX.abort( 
-        not typeof.table( tbl ), 
+        not is.table( tbl ),
         'argument must be type of table'
     );
     AUX.abort( 
-        not typeof.string( tbl[1] ), 
+        not is.string( tbl[1] ),
         'pattern[1] must be type of string'
     );
     
