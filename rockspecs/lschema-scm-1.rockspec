@@ -11,10 +11,10 @@ description = {
 }
 dependencies = {
     "lua >= 5.1",
-    "halo >= 1.1.0",
-    "lrexlib-pcre >= 2.7.2",
-    "tsukuyomi >= 1.0.0",
-    "util >= 1.3.2"
+    "halo >= 1.1.7",
+    "lrexlib-pcre >= 2.8.0",
+    "tsukuyomi >= 1.1.0",
+    "util >= 1.5.1"
 }
 build = {
     type = "builtin",
