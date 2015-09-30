@@ -468,7 +468,7 @@ function ISA:default( val )
         -- check last index
         tail = lastIndex( arr );
         AUX.abort( 
-            tail < 1,
+            tail and tail < 1,
             errmsgPrefix .. 'index must be start at 1'
         );
         
@@ -476,12 +476,12 @@ function ISA:default( val )
         if is.table( self.len ) then
             len = self.len;
             AUX.abort( 
-                tail < len.min, 
+                not tail or tail < len.min, 
                 errmsgPrefix .. 'minimum length constraint #%d violated',
                 len.min
             );
             AUX.abort( 
-                len.max and tail > len.max, 
+                len.max and ( not tail or tail > len.max ),
                 errmsgPrefix .. 'maximum length constraint #%d violated',
                 len.max
             );
@@ -499,7 +499,7 @@ function ISA:default( val )
     end
     
     -- check value
-    for i = 1, tail do
+    for i = 1, tail or 0 do
         len = nil;
         val = arr[i];
         
