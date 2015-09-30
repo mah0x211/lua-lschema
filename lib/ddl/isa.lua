@@ -156,13 +156,18 @@ function ISA:init( typ )
     local index = AUX.getIndex( self );
     local isa, asArray, methods;
 
-    AUX.abort( 
-        not is.string( typ ),
-        'argument must be type of string'
-    );
+    AUX.abort( not is.string( typ ), 'argument must be type of string' );
     
     -- extract array symbol
     isa, asArray = typ:match( '^(%a+[%d]*)(.*)$' );
+    
+    methods = ISA_TYPE[isa];
+    AUX.abort(
+	    not methods,
+	    'data type must be the following types; %s',
+	    ISA_TYPE_NAMES
+	);
+	
     if asArray then
         if asArray == '' then
             asArray = nil;
@@ -171,8 +176,6 @@ function ISA:init( typ )
             AUX.abort( isa == 'table', 'table type does not support array' );
         end
     end
-    methods = ISA_TYPE[isa];
-    AUX.abort( not methods, 'data type must be the following types; %s', ISA_TYPE_NAMES );
     
     -- set isa
     rawset( index, 'isa', isa );
