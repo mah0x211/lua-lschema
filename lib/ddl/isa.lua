@@ -220,7 +220,7 @@ function ISA:len( min, max )
     );
     if max ~= nil then
         AUX.abort( 
-            max and not is.uint( max ),
+            not is.uint( max ),
             'could not set len constraint: ' ..
             'maximum value must be type of uint'
         );
