@@ -453,13 +453,13 @@ Template:setCommand( 'put', put, true );
 do
     local _, err;
     
-    _, err = Template:setPage( 'ISA', ISA );
+    _, err = Template:setPage( 'ISA', ISA, true );
     assert( not err, err );
-    _, err = Template:setPage( 'ISA_ARRAY', ISA_ARRAY );
+    _, err = Template:setPage( 'ISA_ARRAY', ISA_ARRAY, true );
     assert( not err, err );
-    _, err = Template:setPage( 'ENUM', ENUM );
+    _, err = Template:setPage( 'ENUM', ENUM, true );
     assert( not err, err );
-    _, err = Template:setPage( 'STRUCT', STRUCT );
+    _, err = Template:setPage( 'STRUCT', STRUCT, true );
     assert( not err, err );
 end
 
