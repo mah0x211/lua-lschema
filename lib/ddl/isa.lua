@@ -244,7 +244,7 @@ function ISA:len( min, max )
             min
         );
         AUX.abort( 
-            len > max,
+            max and len > max,
             'could not set len constraint: ' ..
             'default value length is greater than ' .. 
             'maximum value #%d',
