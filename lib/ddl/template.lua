@@ -441,6 +441,61 @@ local STRUCT_ENV = {
 };
 
 
+
+local DICT = [=[
+-- dict: <?put $.name ?>
+local pairs = pairs;
+local type = type;
+local VERIFIER = {};
+
+function VERIFIER:proc( tbl, typeconv, trim, split, _rel, _field, _idx )
+    if type( tbl ) == 'table' then
+        local result = {};
+        local key, val, err, errtbl, keys, vals, gotError;
+        
+        -- verify
+        for k, v in pairs( tbl ) do
+            key, kerr = self.key( k, typeconv, trim, split );
+            val, verr = self.val( v, typeconv, trim, split );
+
+            if not kerr and not verr then
+                result[key] = val;
+            elseif not keys then
+                gotError = true;
+                keys = { [k] = kerr };
+                vals = { [v] = verr };
+                errtbl = {
+                    key = keys,
+                    val = vals
+                };
+            else
+                keys[k] = kerr;
+                vals[v] = verr;
+            end
+        end
+        
+        if gotError then
+            return result, errtbl;
+        end
+        
+        return result;
+    end
+    
+    return nil, { 
+        errno = <?put errno.ETYPE ?>,
+        etype = 'ETYPE',
+        attr = <?put $.attr ?>
+    };
+end
+
+return VERIFIER.proc;
+]=];
+local DICT_ENV = {
+    type  = type,
+    pairs = pairs
+};
+
+
 local function put( val )
     return type( val ) == 'string' and ('%q'):format( val ) or val;
 end
@@ -460,6 +515,8 @@ do
     _, err = Template:setPage( 'ENUM', ENUM, true );
     assert( not err, err );
     _, err = Template:setPage( 'STRUCT', STRUCT, true );
+    assert( not err, err );
+    _, err = Template:setPage( 'DICT', DICT, true );
     assert( not err, err );
 end
 
@@ -498,8 +555,17 @@ local function renderStruct( fields, name, attr )
 end
 
 
+local function renderDict( fields, name, attr )
+    return render( 'DICT', {
+        name = ('%q'):format( name ),
+        attr = inspect( attr, INSPECT_OPT )
+    }, DICT_ENV );
+end
+
+
 return {
     renderISA = renderISA,
     renderEnum = renderEnum,
-    renderStruct = renderStruct
+    renderStruct = renderStruct,
+    renderDict = renderDict
 };

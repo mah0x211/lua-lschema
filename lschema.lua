@@ -61,6 +61,7 @@ function Schema:init( name )
     rawset( index, 'isa', createISA );
     rawset( index, 'enum', Container.new('lschema.ddl.enum') );
     rawset( index, 'struct', Container.new('lschema.ddl.struct') );
+    rawset( index, 'dict', Container.new('lschema.ddl.dict') );
     rawset( index, 'pattern', Container.new('lschema.ddl.pattern') );
     -- remove init method
     rawset( index, 'init', nil );
@@ -74,7 +75,7 @@ function Schema:lock()
     local container;
     
     rawset( index, 'isa', nil );
-    for _, k in ipairs({ 'enum', 'struct', 'pattern' }) do
+    for _, k in ipairs({ 'enum', 'struct', 'dict', 'pattern' }) do
         container = rawget( index, k );
         -- remove class
         rawset( AUX.getIndex( container ), 'CLASS_OF', nil );

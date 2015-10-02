@@ -28,7 +28,8 @@ build = {
         ['lschema.ddl.enum'] = "lib/ddl/enum.lua",
         ['lschema.ddl.pattern'] = "lib/ddl/pattern.lua",
         ['lschema.ddl.isa'] = "lib/ddl/isa.lua",
-        ['lschema.ddl.struct'] = "lib/ddl/struct.lua"
+        ['lschema.ddl.struct'] = "lib/ddl/struct.lua",
+        ['lschema.ddl.dict'] = "lib/ddl/dict.lua"
     }
 }
 
