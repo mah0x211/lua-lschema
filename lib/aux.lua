@@ -1,17 +1,17 @@
 --[[
-  
+
   Copyright (C) 2014 Masatoshi Teruya
- 
+
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
   copies of the Software, and to permit persons to whom the Software is
   furnished to do so, subject to the following conditions:
- 
+
   The above copyright notice and this permission notice shall be included in
   all copies or substantial portions of the Software.
- 
+
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
@@ -19,8 +19,8 @@
   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
-  
-  
+
+
   lib/aux.lua
   lua-lschema
   Created by Masatoshi Teruya on 14/06/25.
@@ -41,7 +41,7 @@ AUX.inherits {
 local function getUserStackIndex()
     local list = split( debug.traceback(), '\n' );
     local line;
-    
+
     for idx = 2, #list do
         line = list[idx];
         if not line:find( '(tail call)', 1, true ) and
@@ -50,7 +50,7 @@ local function getUserStackIndex()
             return idx - 2;
         end
     end
-    
+
     return nil;
 end
 
@@ -60,14 +60,14 @@ local function abort( exp, fmt, ... )
         local msg = fmt;
         local args = {...};
         local len = lastIndex( args );
-        
+
         if len then
             for i = 1, len do
                 args[i] = tostring( args[i] );
             end
             msg = msg:format( unpack( args ) );
         end
-        
+
         error( msg, getUserStackIndex() );
     end
 end
@@ -90,12 +90,12 @@ end
 
 local PAT_IDENT     = '^[_a-zA-Z][_a-zA-Z0-9]*$';
 local function isValidIdent( id )
-    abort( 
+    abort(
         not is.string( id ),
-        'identifier must be type of string: %q', tostring(id) 
+        'identifier must be type of string: %q', tostring(id)
     );
-    abort( 
-        not id:find( PAT_IDENT ), 
+    abort(
+        not id:find( PAT_IDENT ),
         'identifier format must be %q : %q', PAT_IDENT, tostring(id)
     );
 end
@@ -120,7 +120,7 @@ local function getAttrs( fields )
             attr[k] = v;
         end
     end
-    
+
     return attr;
 end
 
@@ -129,7 +129,7 @@ local function discardMethods( obj )
     local index = getIndex( obj );
     local fields = {};
     local attr = {};
-    
+
     for k,v in pairs( index ) do
         if k ~= 'constructor' then
             if is.Function( v ) then
@@ -139,10 +139,10 @@ local function discardMethods( obj )
             end
         end
     end
-    
+
     attr.attr = getAttrs( fields );
     rawset( index, '@', attr );
-    
+
     return fields;
 end
 
@@ -150,10 +150,10 @@ end
 local function posing( instance, target )
     local index = getIndex( target );
     local mt = getmetatable( instance );
-    
+
     rawset( mt, 'constructor', target.constructor );
     setmetatable( mt.__index, getmetatable( index ) );
-    
+
     return instance;
 end
 

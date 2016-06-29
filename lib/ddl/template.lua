@@ -1,17 +1,17 @@
 --[[
-  
+
   Copyright (C) 2014 Masatoshi Teruya
- 
+
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
   copies of the Software, and to permit persons to whom the Software is
   furnished to do so, subject to the following conditions:
- 
+
   The above copyright notice and this permission notice shall be included in
   all copies or substantial portions of the Software.
- 
+
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
@@ -19,8 +19,8 @@
   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
-  
-  
+
+
   lib/ddl/template.lua
   lua-lschema
   Created by Masatoshi Teruya on 14/06/27.
@@ -32,8 +32,8 @@ local inspect = require('util').inspect;
 local keys = require('util.table').keys;
 local tsukuyomi = require('tsukuyomi');
 -- constants
-local INSPECT_OPT = { 
-    depth = 0 
+local INSPECT_OPT = {
+    depth = 0
 };
 local ISA_AKA = {
     ['number']  = 'finite',
@@ -86,7 +86,7 @@ local VERIFIER = {};
 <?if $.min == $.max ?>
         if len ~= <?put $.min ?> then
             return nil, {
-                errno = <?put errno.EMIN ?>, 
+                errno = <?put errno.EMIN ?>,
                 etype = 'EMIN',
                 attr = <?put $.attr ?>
             };
@@ -94,8 +94,8 @@ local VERIFIER = {};
 <?else?>
 <?if $.min ?>
         if len < <?put $.min ?> then
-            return nil, { 
-                errno = <?put errno.EMIN ?>, 
+            return nil, {
+                errno = <?put errno.EMIN ?>,
                 etype = 'EMIN',
                 attr = <?put $.attr ?>
             };
@@ -103,7 +103,7 @@ local VERIFIER = {};
 <?end?>
 <?if $.max ?>
         if len > <?put $.max ?> then
-            return nil, { 
+            return nil, {
                 errno = <?put errno.EMAX ?>,
                 etype = 'EMAX',
                 attr = <?put $.attr ?>
@@ -119,7 +119,7 @@ local VERIFIER = {};
         -- PATTERN
         if not pattern:exec( val ) then
             return nil, {
-                errno = <?put errno.EPAT ?>, 
+                errno = <?put errno.EPAT ?>,
                 etype = 'EPAT',
                 attr = <?put $.attr ?>
             };
@@ -131,7 +131,7 @@ local VERIFIER = {};
 <?if $.enum ?>
         -- ENUM
         if not enum( val ) then
-            return nil, { 
+            return nil, {
                 errno = <?put errno.EENUM ?>,
                 etype = 'EENUM',
                 attr = <?put $.attr ?>
@@ -139,7 +139,7 @@ local VERIFIER = {};
         end
 <?end?>
 ]],
-    
+
     ['#STRUCT'] = [[
 <?if $.struct ?>
         -- struct
@@ -156,8 +156,7 @@ local VERIFIER = {};
     if typeconv == true
        <?if $.isa == 'boolean' ?>and type( val ) ~= 'boolean'
        <?elseif $.isa == 'string' ?>and type( val ) ~= 'string'
-       <?else?>and type( val ) ~= 'number'<?end?>
-    then
+       <?else?>and type( val ) ~= 'number'<?end?> then
         val = <?put converter ?>( val );
     end
 <?end?>
@@ -187,8 +186,8 @@ function VERIFIER:proc( val, typeconv, trim, split, _rel, _field, _idx )
 #TYPECONV
 
         if not is.<?put AKA[$.isa] or $.isa ?>( val ) then
-            return nil, { 
-                errno = <?put errno.ETYPE ?>, 
+            return nil, {
+                errno = <?put errno.ETYPE ?>,
                 etype = 'ETYPE',
                 attr = <?put $.attr ?>
             };
@@ -202,8 +201,8 @@ function VERIFIER:proc( val, typeconv, trim, split, _rel, _field, _idx )
 
 <?if $.notNull ?>
     -- not null
-    return nil, { 
-        errno = <?put errno.ENULL ?>, 
+    return nil, {
+        errno = <?put errno.ENULL ?>,
         etype = 'ENULL',
         attr = <?put $.attr ?>
     };
@@ -224,7 +223,7 @@ local function checkVal( val, typeconv, trim, split, _rel, _field, _idx )
 #TYPECONV
 
     if not is.<?put AKA[$.isa] or $.isa ?>( val ) then
-        return nil, { 
+        return nil, {
             errno = <?put errno.ETYPE ?>,
             etype = 'ETYPE',
             attr = <?put $.attr ?>
@@ -248,23 +247,23 @@ function VERIFIER:proc( arr, typeconv, trim, split, _rel, _field, _idx )
 
     if arr ~= nil then
         local len;
-        
+
         if type( arr ) ~= 'table' then
-            return nil, { 
+            return nil, {
                 errno = <?put errno.ETYPE ?>,
                 etype = 'ETYPE',
                 attr = <?put $.attr ?>
             };
         end
-        
+
         -- get last index
         len = lastIndex( arr );
-        
+
 <?if $.len ?>
-        -- length 
-        if not len or len < <?put $.len.min ?> <?if $.len.max 
+        -- length
+        if not len or len < <?put $.len.min ?> <?if $.len.max
         ?>or len > <?put $.len.max ?><?end?> then
-            return nil, { 
+            return nil, {
                 errno = <?put errno.ELEN ?>,
                 etype = 'ELEN',
                 attr = <?put $.attr ?>
@@ -282,8 +281,8 @@ function VERIFIER:proc( arr, typeconv, trim, split, _rel, _field, _idx )
 <?end?>
             for idx = 1, len do
                 val = arr[idx];
-                res, err = checkVal( 
-                    val, typeconv, trim, split, _rel, _field, idx 
+                res, err = checkVal(
+                    val, typeconv, trim, split, _rel, _field, idx
                 );
 <?if $.noDup ?>
                 dupVal = tostring( res );
@@ -307,14 +306,14 @@ function VERIFIER:proc( arr, typeconv, trim, split, _rel, _field, _idx )
                 dupIdx[dupVal] = true;
 <?end?>
             end
-            
+
             return result, gotError and errtbl or nil;
         end
     end
 
 <?if $.notNull ?>
     -- empty array will be interpreted as a null
-    return nil, { 
+    return nil, {
         errno = <?put errno.ENULL ?>,
         etype = 'ENULL',
         attr = <?put $.attr ?>
@@ -340,7 +339,7 @@ function VERIFIER:proc( val )
             attr = <?put $.attr ?>
         };
     end
-    
+
     return val;
 end
 
@@ -360,18 +359,18 @@ function VERIFIER:proc( tbl, typeconv, trim, split, _rel, _field, _idx )
         local result = trim == true and {} or tbl;
         local errtbl = {};
         local field, val, err, gotError;
-        
+
         -- split struct members
         if split then
             local rel = {};
             local data = {};
             local nstack;
-            
+
             for idx = 1, NFIELDS do
                 field = FIELDS[idx];
                 nstack = #split;
-                val, err = self[field]( 
-                    tbl[field], typeconv, trim, split, rel, field 
+                val, err = self[field](
+                    tbl[field], typeconv, trim, split, rel, field
                 );
                 if err then
                     errtbl[field] = err;
@@ -384,7 +383,7 @@ function VERIFIER:proc( tbl, typeconv, trim, split, _rel, _field, _idx )
                     end
                 end
             end
-            
+
             if gotError then
                 return result, errtbl;
             elseif _rel then
@@ -406,15 +405,15 @@ function VERIFIER:proc( tbl, typeconv, trim, split, _rel, _field, _idx )
                     data = data
                 };
             end
-            
+
             -- add current stack-index into related struct
             for i = 1, #rel do
                 split[rel[i]].rel.stack = #split;
             end
-            
+
             return result;
         end
-        
+
         -- non-split verify
         for idx = 1, NFIELDS do
             field = FIELDS[idx];
@@ -427,15 +426,15 @@ function VERIFIER:proc( tbl, typeconv, trim, split, _rel, _field, _idx )
                 result[field] = val;
             end
         end
-        
+
         if gotError then
             return result, errtbl;
         end
-        
+
         return result;
     end
-    
-    return nil, { 
+
+    return nil, {
         errno = <?put errno.ETYPE ?>,
         etype = 'ETYPE',
         attr = <?put $.attr ?>
@@ -460,7 +459,7 @@ function VERIFIER:proc( tbl, typeconv, trim, split, _rel, _field, _idx )
     if type( tbl ) == 'table' then
         local result = {};
         local key, val, err, errtbl, keys, vals, gotError;
-        
+
         -- verify
         for k, v in pairs( tbl ) do
             key, kerr = self.key( k, typeconv, trim, split );
@@ -481,15 +480,15 @@ function VERIFIER:proc( tbl, typeconv, trim, split, _rel, _field, _idx )
                 vals[v] = verr;
             end
         end
-        
+
         if gotError then
             return result, errtbl;
         end
-        
+
         return result;
     end
-    
-    return nil, { 
+
+    return nil, {
         errno = <?put errno.ETYPE ?>,
         etype = 'ETYPE',
         attr = <?put $.attr ?>
@@ -515,7 +514,7 @@ Template:setCommand( 'put', put, true );
 -- register template
 do
     local _, err;
-    
+
     _, err = Template:setPage( 'ISA', ISA, true );
     assert( not err, err );
     _, err = Template:setPage( 'ISA_ARRAY', ISA_ARRAY, true );
@@ -531,11 +530,11 @@ end
 
 local function render( label, data, env )
     local fn, ok = Template:render( label, data );
-    
+
     assert( ok, fn );
     fn, ok = eval( fn, env );
     assert( not ok, ok );
-    
+
     return fn();
 end
 

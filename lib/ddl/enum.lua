@@ -1,17 +1,17 @@
 --[[
-  
+
   Copyright (C) 2014 Masatoshi Teruya
- 
+
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
   copies of the Software, and to permit persons to whom the Software is
   furnished to do so, subject to the following conditions:
- 
+
   The above copyright notice and this permission notice shall be included in
   all copies or substantial portions of the Software.
- 
+
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
@@ -19,8 +19,8 @@
   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
-  
-  
+
+
   lib/ddl/enum.lua
   lua-lschema
   Created by Masatoshi Teruya on 14/06/09.
@@ -43,8 +43,8 @@ Enum.inherits {
 function Enum:init( _, tbl )
     local index = AUX.getIndex( self );
     local hasFields, fn;
-    
-    AUX.abort( 
+
+    AUX.abort(
         not is.table( tbl ),
         'argument must be type of table'
     );
@@ -54,19 +54,19 @@ function Enum:init( _, tbl )
             id, val = val, id;
         end
         AUX.isValidIdent( id );
-        AUX.abort( 
-            rawget( index, id ), 
+        AUX.abort(
+            rawget( index, id ),
             'idenifier %q already defined', id
         );
-        AUX.abort( 
+        AUX.abort(
             not is.finite( val ),
             'identifier %q value must be finite number: %q', id, val
         );
         rawset( index, id, val );
         hasFields = true;
     end
-    
-    AUX.abort( 
+
+    AUX.abort(
         not hasFields,
         'cannot create empty enum'
     );
@@ -75,7 +75,7 @@ function Enum:init( _, tbl )
     fn = Template.renderEnum( AUX.discardMethods( self ), index['@'].attr );
     -- set generated function to __call metamethod
     AUX.setCallMethod( self, fn );
-    
+
     return self;
 end
 
