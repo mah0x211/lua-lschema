@@ -168,6 +168,17 @@ local VERIFIER = {};
 local ISA = ([[
 #PREPARE
 function VERIFIER:proc( val, typeconv, trim, split, _rel, _field, _idx )
+<?if $.default ~= nil ?>
+    -- set default if val is nil
+    if val == nil then
+        val = <?if $.isa == 'table' or $.isa == 'struct'
+              ?><?put $.default
+              ?><?else
+              ?><?$put $.default
+              ?><?end?>;
+    end
+<?end?>
+
     if val ~= nil then
 <?if $.min or $.max ?>
         local len;
@@ -188,15 +199,8 @@ function VERIFIER:proc( val, typeconv, trim, split, _rel, _field, _idx )
 #ENUM
 #STRUCT
     end
-    
-<?if $.default ~= nil ?>
-    -- default
-    return <?if $.isa == 'table' or $.isa == 'struct' 
-    ?><?put $.default 
-    ?><?else
-    ?><?$put $.default 
-    ?><?end?>;
-<?elseif $.notNull ?>
+
+<?if $.notNull ?>
     -- not null
     return nil, { 
         errno = <?put errno.ENULL ?>, 
@@ -235,6 +239,13 @@ local function checkVal( val, typeconv, trim, split, _rel, _field, _idx )
 end
 
 function VERIFIER:proc( arr, typeconv, trim, split, _rel, _field, _idx )
+<?if $.default ~= nil ?>
+    -- set default if arr is nil
+    if arr == nil then
+        arr = <?put $.default ?>;
+    end
+<?end?>
+
     if arr ~= nil then
         local len;
         
@@ -300,11 +311,8 @@ function VERIFIER:proc( arr, typeconv, trim, split, _rel, _field, _idx )
             return result, gotError and errtbl or nil;
         end
     end
-    
-<?if $.default ~= nil ?>
-    -- default
-    return <?put $.default ?>;
-<?elseif $.notNull ?>
+
+<?if $.notNull ?>
     -- empty array will be interpreted as a null
     return nil, { 
         errno = <?put errno.ENULL ?>,
