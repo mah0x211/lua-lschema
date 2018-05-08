@@ -30,8 +30,11 @@ local isString = require('isa').String;
 local isTable = require('isa').Table;
 local isFunction = require('isa').Function;
 local isBoolean = require('isa').Boolean;
-local lastIndex = require('util.table').lastIndex;
 local split = require('string.split');
+local select = select;
+local tostring = tostring;
+
+
 local AUX = require('halo').class.AUX;
 
 AUX.inherits {
@@ -76,12 +79,15 @@ end
 local function abort( exp, fmt, ... )
     if exp then
         local msg = fmt;
-        local args = {...};
-        local len = lastIndex( args );
+        local len = select( '#', ... );
 
-        if len then
+        if len > 0 then
+            local args = {...};
+
             for i = 1, len do
-                args[i] = tostring( args[i] );
+                if not isString( args[i] ) then
+                    args[i] = tostring( args[i] );
+                end
             end
             msg = msg:format( unpack( args ) );
         end
