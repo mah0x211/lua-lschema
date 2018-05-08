@@ -28,7 +28,7 @@
 --]]
 local is = require('util.is');
 local lastIndex = require('util.table').lastIndex;
-local split = require('util.string').split;
+local split = require('string.split');
 local AUX = require('halo').class.AUX;
 
 AUX.inherits {
@@ -39,7 +39,7 @@ AUX.inherits {
     MARK: Class Method
 --]]
 local function getUserStackIndex()
-    local list = split( debug.traceback(), '\n' );
+    local list = split( debug.traceback(), '\n', nil, true );
     local line;
 
     for idx = 2, #list do
