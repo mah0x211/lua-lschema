@@ -36,7 +36,6 @@ local isTable = is.Table;
 local isFunction = is.Function;
 local isFinite = is.Finite;
 local isUInt = is.UInt;
-local lastIndex = require('util.table').lastIndex;
 local AUX = require('lschema.aux');
 local Template = require('lschema.ddl.template');
 local Pattern = require('lschema.ddl.pattern');
@@ -479,7 +478,7 @@ function ISA:default( val )
         );
 
         -- check last index
-        tail = lastIndex( arr );
+        tail = AUX.getLength( arr );
         AUX.abort(
             tail and tail < 1,
             errmsgPrefix .. 'index must be start at 1'
@@ -617,7 +616,7 @@ function ISA:makeCheck()
         pattern     = rawget( fields, 'pattern' ),
         enum        = rawget( fields, 'enum' ),
         struct      = rawget( fields, 'struct' ),
-        lastIndex   = self.asArray and require('util.table').lastIndex or nil
+        getLength   = self.asArray and AUX.getLength or nil
     };
     fields.attr = inspect( index['@'].attr, INSPECT_OPT );
     -- serialize table type default value
