@@ -18,7 +18,6 @@ dependencies = {
     "lrexlib-pcre >= 2.8.0",
     "string-split >= 0.2.0",
     "tsukuyomi >= 1.1.0",
-    "util >= 1.5.1"
 }
 build = {
     type = "builtin",
