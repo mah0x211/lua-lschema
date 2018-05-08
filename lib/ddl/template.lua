@@ -29,7 +29,6 @@
 -- module
 local eval = require('util').eval;
 local inspect = require('util').inspect;
-local keys = require('util.table').keys;
 local tsukuyomi = require('tsukuyomi');
 -- constants
 local INSPECT_OPT = {
@@ -52,7 +51,6 @@ local ISA_TYPE_CONV = {
     ['uint32']      = 'tonumber',
     ['boolean']     = 'toboolean'
 };
-
 
 local SANDBOX = {
     pairs       = pairs,
@@ -503,9 +501,11 @@ local DICT_ENV = {
 };
 
 
+--- custom commands
 local function put( val )
     return type( val ) == 'string' and ('%q'):format( val ) or val;
 end
+
 
 local Template = tsukuyomi.new( nil, SANDBOX );
 -- register custom command $put
@@ -525,6 +525,21 @@ do
     assert( not err, err );
     _, err = Template:setPage( 'DICT', DICT, true );
     assert( not err, err );
+end
+
+
+local function getStrKeys( tbl )
+    local res = {};
+    local idx = 0;
+
+    for k in pairs( tbl ) do
+        if type( k ) == 'string' then
+            idx = idx + 1;
+            res[idx] = k;
+        end
+    end
+
+    return res;
 end
 
 
@@ -553,7 +568,7 @@ end
 
 
 local function renderStruct( fields, name, attr )
-    fields = keys( fields );
+    fields = getStrKeys( fields );
     return render( 'STRUCT', {
         name = ('%q'):format( name ),
         fields = inspect( fields, INSPECT_OPT ),
