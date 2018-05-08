@@ -27,7 +27,8 @@
 
 --]]
 
-local is = require('util.is');
+local isTable = require('isa').Table;
+local isString = require('isa').String;
 local lrex = require('rex_pcre');
 local unpack = unpack or table.unpack;
 local AUX = require('lschema.aux');
@@ -89,11 +90,11 @@ function Pattern:init( _, tbl )
     local index = AUX.getIndex( self );
 
     AUX.abort(
-        not is.table( tbl ),
+        not isTable( tbl ),
         'argument must be type of table'
     );
     AUX.abort(
-        not is.string( tbl[1] ),
+        not isString( tbl[1] ),
         'pattern[1] must be type of string'
     );
 

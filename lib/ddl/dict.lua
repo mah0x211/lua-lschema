@@ -28,7 +28,8 @@
 --]]
 -- module
 local halo = require('halo');
-local is = require('util.is');
+local isString = require('isa').String;
+local isTable = require('isa').Table;
 local AUX = require('lschema.aux');
 local Template = require('lschema.ddl.template');
 -- constants
@@ -56,12 +57,12 @@ function Dict:init( name, tbl )
     local fn;
 
     AUX.abort(
-        not is.table( tbl ),
+        not isTable( tbl ),
         'argument must be type of table'
     );
     for id, isa in pairs( tbl ) do
         AUX.abort(
-            not is.string( id ) or not FIELD_IDENT[id],
+            not isString( id ) or not FIELD_IDENT[id],
             'identifier must be "key" or "val" : %q', tostring(id)
         );
         AUX.abort(

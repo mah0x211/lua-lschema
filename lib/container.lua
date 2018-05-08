@@ -28,7 +28,7 @@
 --]]
 
 -- module
-local is = require('util.is');
+local isNil = require('isa').Nil;
 local AUX = require('lschema.aux');
 -- constants
 local RESERVED_IDENT = {
@@ -56,7 +56,7 @@ function Container:__call( name )
         'identifier %q is reserved word', tostring(name)
     );
     AUX.abort(
-        not is.Nil( rawget( index, name ) ),
+        not isNil( rawget( index, name ) ),
         'idenifier %q already defined', tostring(name)
     );
     return function( ... )

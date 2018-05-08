@@ -29,7 +29,13 @@
 -- module
 local halo = require('halo');
 local inspect = require('util').inspect;
-local is = require('util.is');
+local is = require('isa');
+local isBoolean = is.Boolean;
+local isString = is.String;
+local isTable = is.Table;
+local isFunction = is.Function;
+local isFinite = is.Finite;
+local isUInt = is.UInt;
 local lastIndex = require('util.table').lastIndex;
 local AUX = require('lschema.aux');
 local Template = require('lschema.ddl.template');
@@ -140,7 +146,7 @@ local function toboolean( arg )
             return false;
         end
     elseif t == 'number' then
-        return is.finite( arg ) and arg ~= 0;
+        return isFinite( arg ) and arg ~= 0;
     end
 end
 
@@ -162,7 +168,7 @@ function ISA:init( typ )
     local index = AUX.getIndex( self );
     local isa, asArray, methods;
 
-    AUX.abort( not is.string( typ ), 'argument must be type of string' );
+    AUX.abort( not isString( typ ), 'argument must be type of string' );
 
     -- extract array symbol
     isa, asArray = typ:match( '^(%a+[%d]*)(.*)$' );
@@ -221,13 +227,13 @@ function ISA:len( min, max )
 
     checkOfAttr( index, self.isa );
     AUX.abort(
-        not is.uint( min ),
+        not isUInt( min ),
         'could not set len constraint: ' ..
         'minimum value must be type of uint'
     );
     if max ~= nil then
         AUX.abort(
-            not is.uint( max ),
+            not isUInt( max ),
             'could not set len constraint: ' ..
             'maximum value must be type of uint'
         );
@@ -240,7 +246,7 @@ function ISA:len( min, max )
     end
 
     -- check default value length
-    if is.table( self.default ) then
+    if isTable( self.default ) then
         local len = #self.default;
 
         AUX.abort(
@@ -274,7 +280,7 @@ function ISA:noDup( ... )
     AUX.abort( #{...} > 0, 'should not pass argument' );
 
     -- check default value duplication
-    if is.table( self.default ) then
+    if isTable( self.default ) then
         local dupIdx = {};
 
         for idx, val in ipairs( self.default ) do
@@ -338,13 +344,13 @@ function ISA:min( min )
         self.max
     );
     -- check default value size
-    if not is.Function( self.default ) then
+    if not isFunction( self.default ) then
         local defval = self.default;
 
         if self.asArray then
             for idx, val in ipairs( defval ) do
                 AUX.abort(
-                    ( is.string( val ) and #val or val ) < min,
+                    ( isString( val ) and #val or val ) < min,
                     'could not set min value constraint: ' ..
                     'default value#%d is less than min constraint value #%d',
                     idx, min
@@ -352,7 +358,7 @@ function ISA:min( min )
             end
         else
             AUX.abort(
-                ( is.string( defval ) and #defval or defval ) < min,
+                ( isString( defval ) and #defval or defval ) < min,
                 'could not set min value constraint: ' ..
                 'default value is less than min constraint value #%d',
                 min
@@ -386,13 +392,13 @@ function ISA:max( max )
         self.min
     );
     -- check default value size
-    if not is.Function( self.default ) then
+    if not isFunction( self.default ) then
         local defval = self.default;
 
         if self.asArray then
             for idx, val in ipairs( defval ) do
                 AUX.abort(
-                    ( is.string( val ) and #val or val ) > max,
+                    ( isString( val ) and #val or val ) > max,
                     'could not set max value constraint: ' ..
                     'default value#%d is greater than max constraint #%d',
                     idx, max
@@ -400,7 +406,7 @@ function ISA:max( max )
             end
         else
             AUX.abort(
-                ( is.string( defval ) and #defval or defval ) > max,
+                ( isString( defval ) and #defval or defval ) > max,
                 'could not set max value constraint: ' ..
                 'default value is greater than max constraint #%d',
                 max
@@ -423,7 +429,7 @@ function ISA:pattern( pat )
     );
 
     -- check default value
-    if not is.Function( self.default ) then
+    if not isFunction( self.default ) then
         if self.asArray then
             for idx, val in ipairs( self.default ) do
                 AUX.abort(
@@ -468,7 +474,7 @@ function ISA:default( val )
         );
 
         AUX.abort(
-            not is.table( arr ),
+            not isTable( arr ),
             errmsgPrefix .. 'value must be type of array(table)'
         );
 
@@ -480,7 +486,7 @@ function ISA:default( val )
         );
 
         -- check array length constraint
-        if is.table( self.len ) then
+        if isTable( self.len ) then
             len = self.len;
             AUX.abort(
                 not tail or tail < len.min,
@@ -495,7 +501,7 @@ function ISA:default( val )
         end
 
         -- init noDup constraint check variables
-        if is.boolean( self.noDup ) and self.noDup then
+        if isBoolean( self.noDup ) and self.noDup then
             dupIdx = {};
             noDup = true;
         end
@@ -546,14 +552,14 @@ function ISA:default( val )
                 end
                 len = #val;
             -- for number
-            elseif is.finite( val ) then
+            elseif isFinite( val ) then
                 len = val;
             end
 
             -- check min/max constraint
             if len then
                 -- min check
-                if is.finite( self.min ) then
+                if isFinite( self.min ) then
                     AUX.abort(
                         len < self.min,
                         errmsgPrefix .. 'min constraint #%d violated',
@@ -561,7 +567,7 @@ function ISA:default( val )
                     );
                 end
                 -- max check
-                if is.finite( self.max ) then
+                if isFinite( self.max ) then
                     AUX.abort(
                         len > self.max,
                         errmsgPrefix .. 'max constraint #%d violated',
@@ -615,7 +621,7 @@ function ISA:makeCheck()
     };
     fields.attr = inspect( index['@'].attr, INSPECT_OPT );
     -- serialize table type default value
-    if is.table( fields.default ) then
+    if isTable( fields.default ) then
         fields.default = inspect( fields.default, INSPECT_OPT );
     end
 

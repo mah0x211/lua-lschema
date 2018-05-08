@@ -26,7 +26,10 @@
   Created by Masatoshi Teruya on 14/06/25.
 
 --]]
-local is = require('util.is');
+local isString = require('isa').String;
+local isTable = require('isa').Table;
+local isFunction = require('isa').Function;
+local isBoolean = require('isa').Boolean;
 local lastIndex = require('util.table').lastIndex;
 local split = require('string.split');
 local AUX = require('halo').class.AUX;
@@ -91,7 +94,7 @@ end
 local PAT_IDENT     = '^[_a-zA-Z][_a-zA-Z0-9]*$';
 local function isValidIdent( id )
     abort(
-        not is.string( id ),
+        not isString( id ),
         'identifier must be type of string: %q', tostring(id)
     );
     abort(
@@ -108,11 +111,11 @@ local function getAttrs( fields )
     for k,v in pairs( fields ) do
         if k == 'pattern' then
             attr[k] = v['@'].attr;
-        elseif is.table( v ) then
+        elseif isTable( v ) then
             attr[k] = v['@'] and v['@'].attr or v;
         elseif k == 'default' then
             attr[k] = v;
-        elseif is.boolean( v ) then
+        elseif isBoolean( v ) then
             if v then
                 attr[k] = v;
             end
@@ -132,7 +135,7 @@ local function discardMethods( obj )
 
     for k,v in pairs( index ) do
         if k ~= 'constructor' then
-            if is.Function( v ) then
+            if isFunction( v ) then
                 rawset( index, k, nil );
             else
                 rawset( fields, k, v );

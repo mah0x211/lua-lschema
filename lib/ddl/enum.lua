@@ -27,7 +27,9 @@
 
 --]]
 
-local is = require('util.is');
+local isTable = require('isa').Table;
+local isNumber = require('isa').Number;
+local isFinite = require('isa').Finite;
 local AUX = require('lschema.aux');
 local Template = require('lschema.ddl.template');
 local Enum = require('halo').class.Enum;
@@ -45,12 +47,12 @@ function Enum:init( _, tbl )
     local hasFields, fn;
 
     AUX.abort(
-        not is.table( tbl ),
+        not isTable( tbl ),
         'argument must be type of table'
     );
     for id, val in pairs( tbl ) do
         -- array
-        if is.number( id ) then
+        if isNumber( id ) then
             id, val = val, id;
         end
         AUX.isValidIdent( id );
@@ -59,7 +61,7 @@ function Enum:init( _, tbl )
             'idenifier %q already defined', id
         );
         AUX.abort(
-            not is.finite( val ),
+            not isFinite( val ),
             'identifier %q value must be finite number: %q', id, val
         );
         rawset( index, id, val );
