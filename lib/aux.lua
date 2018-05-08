@@ -58,6 +58,21 @@ local function getUserStackIndex()
 end
 
 
+-- find last index number
+local function getLength( tbl )
+    local tail;
+
+    for idx in pairs( tbl ) do
+        -- lua ignore the order of array
+        if type( idx ) == 'number' and ( not tail or tail < idx ) then
+            tail = idx;
+        end
+    end
+
+    return tail;
+end
+
+
 local function abort( exp, fmt, ... )
     if exp then
         local msg = fmt;
@@ -164,6 +179,7 @@ end
 AUX {
     isValidIdent    = isValidIdent,
     getIndex        = getIndex,
+    getLength       = getLength,
     setCallMethod   = setCallMethod,
     hasCallMethod   = hasCallMethod,
     abort           = abort,
