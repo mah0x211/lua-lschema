@@ -28,12 +28,9 @@
 --]]
 -- module
 local loadchunk = require('loadchunk').string;
-local inspect = require('util').inspect;
+local dump = require('dump');
 local tsukuyomi = require('tsukuyomi');
 -- constants
-local INSPECT_OPT = {
-    depth = 0
-};
 local ISA_AKA = {
     ['number']  = 'finite',
     ['enum']    = 'string',
@@ -561,8 +558,8 @@ end
 
 local function renderEnum( fields, attr )
     return render( 'ENUM', {
-        fields = inspect( fields, INSPECT_OPT ),
-        attr = inspect( attr, INSPECT_OPT )
+        fields = dump( fields, 0 ),
+        attr = dump( attr, 0 )
     }, ENUM_ENV );
 end
 
@@ -571,8 +568,8 @@ local function renderStruct( fields, name, attr )
     fields = getStrKeys( fields );
     return render( 'STRUCT', {
         name = ('%q'):format( name ),
-        fields = inspect( fields, INSPECT_OPT ),
-        attr = inspect( attr, INSPECT_OPT )
+        fields = dump( fields, 0 ),
+        attr = dump( attr, 0 )
     }, STRUCT_ENV );
 end
 
@@ -580,7 +577,7 @@ end
 local function renderDict( fields, name, attr )
     return render( 'DICT', {
         name = ('%q'):format( name ),
-        attr = inspect( attr, INSPECT_OPT )
+        attr = dump( attr, 0 )
     }, DICT_ENV );
 end
 

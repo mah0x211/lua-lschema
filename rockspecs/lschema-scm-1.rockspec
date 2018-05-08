@@ -11,6 +11,7 @@ description = {
 }
 dependencies = {
     "lua >= 5.1",
+    "dump >= 0.1.1",
     "halo >= 1.1.7",
     "isa >= 0.1.0",
     "loadchunk >= 0.1.0",

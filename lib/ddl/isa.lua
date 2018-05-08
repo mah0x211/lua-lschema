@@ -28,7 +28,7 @@
 --]]
 -- module
 local halo = require('halo');
-local inspect = require('util').inspect;
+local dump = require('dump');
 local is = require('isa');
 local isBoolean = is.Boolean;
 local isString = is.String;
@@ -39,10 +39,6 @@ local isUInt = is.UInt;
 local AUX = require('lschema.aux');
 local Template = require('lschema.ddl.template');
 local Pattern = require('lschema.ddl.pattern');
--- constants
-local INSPECT_OPT = {
-    depth = 0
-};
 
 
 --[[-----------------------------------------------------------------------------
@@ -283,7 +279,7 @@ function ISA:noDup( ... )
         local dupIdx = {};
 
         for idx, val in ipairs( self.default ) do
-            val = inspect( val, INSPECT_OPT );
+            val = dump( val, 0 );
             AUX.abort(
                 dupIdx[val],
                 'could not set noDup constraint: ' ..
@@ -578,7 +574,7 @@ function ISA:default( val )
 
         -- check noDup constraint
         if noDup then
-            val = inspect( val, INSPECT_OPT );
+            val = dump( val, 0 );
             AUX.abort(
                 dupIdx[val],
                 errmsgPrefix ..
@@ -618,10 +614,10 @@ function ISA:makeCheck()
         struct      = rawget( fields, 'struct' ),
         getLength   = self.asArray and AUX.getLength or nil
     };
-    fields.attr = inspect( index['@'].attr, INSPECT_OPT );
+    fields.attr = dump( index['@'].attr, 0 );
     -- serialize table type default value
     if isTable( fields.default ) then
-        fields.default = inspect( fields.default, INSPECT_OPT );
+        fields.default = dump( fields.default, 0 );
     end
 
     -- make check function
