@@ -27,7 +27,7 @@
 
 --]]
 -- module
-local eval = require('util').eval;
+local loadchunk = require('loadchunk').string;
 local inspect = require('util').inspect;
 local tsukuyomi = require('tsukuyomi');
 -- constants
@@ -547,7 +547,7 @@ local function render( label, data, env )
     local fn, ok = Template:render( label, data );
 
     assert( ok, fn );
-    fn, ok = eval( fn, env );
+    fn, ok = loadchunk( fn, env );
     assert( not ok, ok );
 
     return fn();
