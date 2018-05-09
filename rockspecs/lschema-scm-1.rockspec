@@ -15,7 +15,7 @@ dependencies = {
     "halo >= 1.1.7",
     "isa >= 0.1.0",
     "loadchunk >= 0.1.0",
-    "lrexlib-pcre >= 2.8.0",
+    "regex >= 0.1.0",
     "string-split >= 0.2.0",
     "tsukuyomi >= 1.1.0",
 }

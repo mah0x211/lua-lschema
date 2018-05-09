@@ -29,7 +29,7 @@
 
 local isTable = require('isa').Table;
 local isString = require('isa').String;
-local lrex = require('rex_pcre');
+local Regex = require('regex');
 local unpack = unpack or table.unpack;
 local AUX = require('lschema.aux');
 local Pattern = require('halo').class.Pattern;
@@ -88,6 +88,7 @@ end
 function Pattern:init( _, tbl )
     local own = protected( self );
     local index = AUX.getIndex( self );
+    local re, err;
 
     AUX.abort(
         not isTable( tbl ),
@@ -97,6 +98,10 @@ function Pattern:init( _, tbl )
         not isString( tbl[1] ),
         'pattern[1] must be type of string'
     );
+    -- compile
+    re, err = Regex.new( unpack( tbl ) );
+    AUX.abort( err ~= nil, err );
+
 
     index['@'] = {
         attr = {
@@ -104,7 +109,7 @@ function Pattern:init( _, tbl )
             opts = select( 2, tbl )
         }
     };
-    own.regex = lrex.new( unpack( tbl ) );
+    own.regex = re;
 
     return self;
 end
