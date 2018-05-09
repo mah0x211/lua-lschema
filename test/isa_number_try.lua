@@ -31,7 +31,7 @@ end
 -- valid
 for _, val in pairs({
     -- number
-        0, 1, 
+        0, 1,
     -- negative number
         -0, -1,
     -- float

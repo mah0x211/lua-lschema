@@ -36,7 +36,7 @@ for _, typ in ipairs({
     elseif typ == 'struct' then
         isa:of( myschema.struct.mystruct );
     end
-    
+
     -- does not support a pattern constraint
     if typ ~= 'string' then
         -- attempted to access to undefined value
@@ -48,7 +48,7 @@ for _, typ in ipairs({
             isa:pattern( myschema.pattern.email );
         end));
     end
-    
+
     -- array
     -- does not support array
     if typ == 'table' then
@@ -62,7 +62,7 @@ for _, typ in ipairs({
         elseif typ == 'struct' then
             isa:of( myschema.struct.mystruct );
         end
-        
+
         -- does not support a pattern constraint
         if typ ~= 'string' then
             -- attempted to access to undefined value

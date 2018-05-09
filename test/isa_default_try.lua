@@ -24,13 +24,13 @@ myschema.struct 'mystruct' {
 
 local function createISA( typ )
     local isa = myschema.isa( typ );
-    
+
     if typ:find('^enum') then
         isa:of(myschema.enum.myenum);
     elseif typ:find('^struct') then
         isa:of(myschema.struct.mystruct);
     end
-    
+
     return isa;
 end
 
@@ -81,11 +81,11 @@ for typ, val in pairs({
     ifTrue(isolate(function()
         isa:default();
     end));
-    
+
     -- min/max constraint violation
     if not NOSUP_MINMAX[typ] then
         local len;
-        
+
         if typ == 'string' then
             len = #val;
             -- pattern constraint violation
@@ -95,7 +95,7 @@ for typ, val in pairs({
         else
             len = val;
         end
-        
+
         -- min
         ifTrue(isolate(function()
             withMinConstraint( typ, len + 1, val );
@@ -116,7 +116,7 @@ for typ, val in pairs({
     _, err = isa();
     ifNotNil( err );
     ifNotEqual( inspect(_), inspect(val) );
-    
+
     -- array
     -- does not support array
     if typ == 'table' then
@@ -130,7 +130,7 @@ for typ, val in pairs({
         ifTrue(isolate(function()
             isa:default();
         end));
-        
+
         -- length constraint violation
         -- min len
         ifTrue(isolate(function()
@@ -140,15 +140,15 @@ for typ, val in pairs({
         ifTrue(isolate(function()
             withLenConstraint( typ .. '[]', 1, 1, { val, val } );
         end));
-        
+
         -- noDup constraint violation
         ifTrue(isolate(function()
             withNoDupConstraint( typ .. '[]', { val, val } );
         end));
-        
+
         if not NOSUP_MINMAX[typ] then
             local len;
-            
+
             -- pattern constraint
             if typ == 'string' then
                 len = #val;
@@ -158,7 +158,7 @@ for typ, val in pairs({
             else
                 len = val;
             end
-            
+
             -- min constraint violation
             ifTrue(isolate(function()
                 withMinConstraint( typ .. '[]', len + 1, { val, val } );
@@ -168,7 +168,7 @@ for typ, val in pairs({
                 withMaxConstraint( typ .. '[]', len - 1, { val, val } );
             end));
         end
-        
+
         -- valid defintion
         isa = createISA( typ .. '[]' );
         val = { val, val };
@@ -176,7 +176,7 @@ for typ, val in pairs({
             isa:default( val );
             isa:makeCheck();
         end));
-        
+
         -- valid validation
         _, err = isa();
         ifNotNil( err );

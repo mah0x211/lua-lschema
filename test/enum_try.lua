@@ -56,10 +56,10 @@ ifNotEqual( enum.myenum('name1'), 'name1' );
 ifNotEqual( enum.myenum('name2'), 'name2' );
 -- verify error
 local res, err = enum.myenum('name3');
-local cmp = { 
+local cmp = {
     errno = errno.EENUM,
     etype = "EENUM",
-    attr = { 
+    attr = {
         name1 = 1,
         name2 = 2
     }

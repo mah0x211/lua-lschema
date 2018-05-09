@@ -20,7 +20,7 @@ for _, val in ipairs({
     -- nan
         0/0,
     -- number
-        0, 1, 
+        0, 1,
     -- negative number
         -0, -1,
     -- float

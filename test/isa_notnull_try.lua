@@ -34,12 +34,12 @@ for typ, val in pairs({
     elseif typ == 'struct' then
         isa:of(myschema.struct.mystruct);
     end
-    
+
     -- invalid definition: argument disallowed
     ifTrue(isolate(function()
         isa:notNull(1);
     end));
-    
+
     -- valid defintion
     ifNotTrue(isolate(function()
         isa:notNull();
@@ -49,7 +49,7 @@ for typ, val in pairs({
         end));
         isa:makeCheck();
     end));
-    
+
     -- valid validation
     _, err = isa( val );
     ifNotNil( err );
@@ -57,7 +57,7 @@ for typ, val in pairs({
     _, err = isa();
     ifNotEqual( err.errno, errno.ENULL );
     ifNotEqual( err.etype, 'ENULL' );
-    
+
     -- array
     -- does not support array
     if typ == 'table' then
@@ -71,7 +71,7 @@ for typ, val in pairs({
         elseif typ == 'struct' then
             isa:of(myschema.struct.mystruct);
         end
-        
+
         -- invalid difinition: argument disallowed
         ifTrue(isolate(function()
             isa:notNull(1);
@@ -85,7 +85,7 @@ for typ, val in pairs({
             end));
             isa:makeCheck();
         end));
-        
+
         -- valid validation
         _, err = isa( {val} );
         ifNotNil( err );

@@ -40,7 +40,7 @@ for typ, val in pairs({
     elseif typ == 'struct' then
         isa:of( myschema.struct.mystruct );
     end
-    
+
     -- does not support max constraint
     if EXCEPTS[typ] then
         -- attempt to access an undefined value
@@ -52,7 +52,7 @@ for typ, val in pairs({
         ifTrue(isolate(function()
             isa:max();
         end));
-        
+
         -- valid defintion
         ifNotTrue(isolate(function()
             if typ == 'string' then
@@ -67,7 +67,7 @@ for typ, val in pairs({
             end));
             isa:makeCheck();
         end));
-        
+
         -- valid validation
         _, err = isa( val );
         ifNotNil( err );
@@ -80,7 +80,7 @@ for typ, val in pairs({
         ifNotEqual( err.errno, errno.EMAX );
         ifNotEqual( err.etype, 'EMAX' );
     end
-    
+
     -- array
     -- does not support array
     if typ == 'table' then
@@ -94,7 +94,7 @@ for typ, val in pairs({
         elseif typ == 'struct' then
             isa:of( myschema.struct.mystruct );
         end
-    
+
         -- does not support max constraint
         if EXCEPTS[typ] then
             -- attempt to access an undefined value
@@ -121,7 +121,7 @@ for typ, val in pairs({
                 end));
                 isa:makeCheck();
             end));
-            
+
             -- valid validation
             _, err = isa( {val} );
             ifNotNil( err );
